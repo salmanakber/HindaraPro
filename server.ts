@@ -18,6 +18,7 @@ import {
   SERVICE_CAPABILITIES,
 } from './src/data/portfolio.ts';
 import {
+  type AssistantLanguageCode,
   type AssistantMode,
   type AssistantToolAction,
   buildBrandVideoFocusAction,
@@ -25,6 +26,7 @@ import {
   buildHireScopeSummary,
   buildScopeRecommendationAction,
   buildVentureSpotlightAction,
+  resolveAssistantLanguage,
   sanitizeSpeechText,
   validateHireBrief,
   type HireBriefInput,
@@ -345,6 +347,7 @@ async function createServer() {
       messages?: Array<{ role?: string; content?: string }>;
       contextVentureId?: string;
       mode?: AssistantMode;
+      language?: AssistantLanguageCode;
     };
 
     const rawMessages = Array.isArray(body?.messages) ? body.messages : [];
@@ -374,6 +377,7 @@ async function createServer() {
 
     const mode: AssistantMode =
       body?.mode === 'architect' || body?.mode === 'brief-builder' ? body.mode : 'advisor';
+    const selectedLang = resolveAssistantLanguage(body?.language);
 
     const ventureContext = SAAS_VENTURES.map(
       (v) =>
@@ -403,14 +407,20 @@ async function createServer() {
           ? 'Active Mode: BRIEF BUILDER — Help convert the visitor request into a clean Hire Brief. Proactively call prepareHireBrief (or recommendArchitectureScope) with structured track, timeline, budgetRange, and projectGoals so they can apply or submit immediately.'
           : 'Active Mode: ADVISOR — Give concise executive answers about Hindara Labs, its six live SaaS products, brand films, and hiring Suleman Khan. Use tools whenever interactive cards (product spotlights, scope estimates, brief drafts, or brand reels) add clear value.';
 
+    const languageRule =
+      selectedLang.code === 'auto'
+        ? 'Language Rule (Auto-Detect): Detect the exact language of the visitor\'s latest message (for example English, Urdu, Arabic, Spanish, French, German, Hindi, Chinese, Portuguese, Turkish, etc.) and write your entire conversational response—and any descriptive tool summary arguments—fluently in that same language. Always keep proper product and brand names (Hindara Labs, Suleman Khan, TidyFlow, TidyAgent, TidySync, StockSentry, AfterSale OS, SlotWise) and exact URLs/email intact.'
+        : `Language Rule (Explicit): Write your entire conversational response—and any descriptive summary parameters passed to tools—strictly and fluently in ${selectedLang.englishName} (${selectedLang.nativeLabel}). Always keep proper brand/product names (Hindara Labs, Suleman Khan, TidyFlow, TidyAgent, TidySync, StockSentry, AfterSale OS, SlotWise) and exact URLs/email intact.`;
+
     const systemInstruction = `You are the Hindara Labs Studio Concierge AI, representing ${FOUNDER_PROFILE.studioName} and its founder ${FOUNDER_PROFILE.primaryName}.
 Rules:
-1. Always refer to the founder solely as "${FOUNDER_PROFILE.primaryName}". Never use any other name or alias.
+1. Always refer to the founder solely as "${FOUNDER_PROFILE.primaryName}" (even when responding in another language). Never use any other name or alias.
 2. Be concise, crisp, authoritative, and helpful (2–4 sentences or short bullet points). Do NOT use markdown [label](url) link brackets or inline backticks — write clean plain URLs (e.g. https://hindaralabs.com/) or hindarapro@gmail.com directly.
-3. ${modeGuidance}
-4. Only cite exact URLs listed below (such as https://hindaralabs.com/ or the six product URLs) and the exact email ${FOUNDER_PROFILE.email}. Never invent or guess other domain names or construct https://hindarapro@gmail.com.
-5. Invite serious project inquiries to apply the Hire Brief on the page (#hire-me) or email ${FOUNDER_PROFILE.email}.
-6. Never invent fake metrics, fake client names, or unverified claims.
+3. ${languageRule}
+4. ${modeGuidance}
+5. Only cite exact URLs listed below (such as https://hindaralabs.com/ or the six product URLs) and the exact email ${FOUNDER_PROFILE.email}. Never invent or guess other domain names or construct https://hindarapro@gmail.com.
+6. Invite serious project inquiries to apply the Hire Brief on the page (#hire-me) or email ${FOUNDER_PROFILE.email}.
+7. Never invent fake metrics, fake client names, or unverified claims.
 
 Founder: ${FOUNDER_PROFILE.primaryName} (${FOUNDER_PROFILE.role})
 Studio: ${FOUNDER_PROFILE.studioName} (${FOUNDER_PROFILE.domain})
@@ -719,7 +729,7 @@ ${trackContext}${
         contents: [
           {
             role: 'user',
-            parts: [{ text: `Read clearly in an executive SaaS studio tone: ${spokenText}` }],
+            parts: [{ text: spokenText }],
           },
         ],
         config: {

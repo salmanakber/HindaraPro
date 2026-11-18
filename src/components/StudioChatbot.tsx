@@ -1,9 +1,10 @@
-import { Fragment, type FormEvent, useEffect, useRef, useState } from 'react';
+import { Fragment, type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   ArrowUpRight,
   Check,
   Film,
+  Globe,
   Loader2,
   Maximize2,
   MessageSquare,
@@ -15,12 +16,17 @@ import {
   X,
 } from 'lucide-react';
 import { FOUNDER_PROFILE, type BrandVideoItem } from '../data/portfolio';
-import type {
-  AssistantMode,
-  AssistantToolAction,
-  BuildSurface,
-  HireBriefInput,
-  ProjectStage,
+import {
+  ASSISTANT_LANGUAGES,
+  getLocalizedStarterPrompts,
+  isRtlText,
+  resolveAssistantLanguage,
+  type AssistantLanguageCode,
+  type AssistantMode,
+  type AssistantToolAction,
+  type BuildSurface,
+  type HireBriefInput,
+  type ProjectStage,
 } from '../utils/portfolioLogic';
 
 export interface ChatMessage {
@@ -64,42 +70,27 @@ const MODE_OPTIONS: Array<{ id: AssistantMode; label: string; hint: string }> = 
   },
 ];
 
-const STARTER_PROMPTS_BY_MODE: Record<AssistantMode, string[]> = {
-  advisor: [
-    'Which Hindara Labs SaaS fits a Shopify brand?',
-    'Explain what TidyFlow and TidyAgent do together',
-    'Show me the Hindara Labs brand film overview',
-    'How can I hire Suleman Khan for a SaaS MVP?',
-  ],
-  architect: [
-    'Scope a Shopify warranty app and React Native mobile companion',
-    'How is TidyFlow architected across Web, iOS & Android?',
-    'Estimate a 0→1 multi-tenant B2B SaaS with AI automation',
-    'Compare StockSentry vs AfterSale OS architecture',
-  ],
-  'brief-builder': [
-    'Prepare a Hire Brief for a 0→1 SaaS MVP launching next month',
-    'Draft a React Native & Shopify integration brief ($5k–$15k)',
-    'Set up a Fractional CTO inquiry for scaling our SaaS',
-    'I want to send an inquiry to Suleman Khan now',
-  ],
-};
-
-const INITIAL_ASSISTANT_MESSAGE: ChatMessage = {
-  id: 'welcome',
-  role: 'assistant',
-  content: `Welcome to Hindara Labs. Ask about our six live SaaS products, request an architecture scope estimate, watch a studio brand film, or draft a project brief directly with ${FOUNDER_PROFILE.primaryName}.`,
-};
+function createWelcomeMessage(language: AssistantLanguageCode): ChatMessage {
+  const lang = resolveAssistantLanguage(language);
+  return {
+    id: 'welcome',
+    role: 'assistant',
+    content: lang.welcomeMessage,
+  };
+}
 
 function normalizeLineMarkdown(rawLine: string): string {
   const bulletMatch = rawLine.match(/^\s*[*-]\s+(.*)$/);
   const baseLine = bulletMatch ? `• ${bulletMatch[1]}` : rawLine;
   return baseLine
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+|#[^\s)]+)\)/g, (_m, label: string, target: string) => {
-      if (target.includes('hindarapro@gmail.com')) return 'hindarapro@gmail.com';
-      if (target.startsWith('#')) return label;
-      return `${label} (${target})`;
-    })
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+|#[^\s)]+)\)/g,
+      (_m, label: string, target: string) => {
+        if (target.includes('hindarapro@gmail.com')) return 'hindarapro@gmail.com';
+        if (target.startsWith('#')) return label;
+        return `${label} (${target})`;
+      }
+    )
     .replace(/https?:\/\/hindarapro@gmail\.com/g, 'hindarapro@gmail.com')
     .replace(/`([^`]+)`/g, '$1');
 }
@@ -167,7 +158,8 @@ export function StudioChatbot({
   onInspectVenture,
   onPlayBrandVideo,
 }: StudioChatbotProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_ASSISTANT_MESSAGE]);
+  const [language, setLanguage] = useState<AssistantLanguageCode>('auto');
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage('auto')]);
   const [mode, setMode] = useState<AssistantMode>('advisor');
   const [expanded, setExpanded] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -187,6 +179,16 @@ export function StudioChatbot({
   const listEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const lastProcessedNonceRef = useRef<number>(0);
+
+  const selectedLanguageObj = useMemo(
+    () => resolveAssistantLanguage(language),
+    [language]
+  );
+
+  const starterPrompts = useMemo(
+    () => getLocalizedStarterPrompts(language, mode),
+    [language, mode]
+  );
 
   const stopAudioPlayback = () => {
     if (audioPlayerRef.current) {
@@ -222,6 +224,16 @@ export function StudioChatbot({
   useEffect(() => {
     return () => stopAudioPlayback();
   }, []);
+
+  const handleLanguageChange = (nextCode: AssistantLanguageCode) => {
+    setLanguage(nextCode);
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].id === 'welcome') {
+        return [createWelcomeMessage(nextCode)];
+      }
+      return prev;
+    });
+  };
 
   const markApplied = (key: string) => {
     setAppliedKeys((prev) => ({ ...prev, [key]: true }));
@@ -272,7 +284,7 @@ export function StudioChatbot({
       const response = await fetch('/api/chat/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: msg.content }),
+        body: JSON.stringify({ text: msg.content, language }),
       });
       const payload = await response.json();
       if (!response.ok || !payload.ok || !payload.audioBase64) {
@@ -356,6 +368,7 @@ export function StudioChatbot({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: overrideMode ?? mode,
+          language,
           contextVentureId: overrideVentureId ?? contextVentureId,
           messages: nextHistory
             .filter((m) => m.id !== 'welcome')
@@ -502,7 +515,7 @@ export function StudioChatbot({
 
   const handleReset = () => {
     stopAudioPlayback();
-    setMessages([INITIAL_ASSISTANT_MESSAGE]);
+    setMessages([createWelcomeMessage(language)]);
     setContextVentureId(undefined);
     setErrorText(null);
     setInputValue('');
@@ -518,8 +531,9 @@ export function StudioChatbot({
       return (
         <div
           key={actionKey}
+          dir="ltr"
           data-testid="chat-tool-scope"
-          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-xs text-[#15102b] shadow-xs"
+          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b] shadow-xs"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
             Scope Estimate · {action.recommendation.estimatedWeeks}
@@ -571,8 +585,9 @@ export function StudioChatbot({
       return (
         <div
           key={actionKey}
+          dir="ltr"
           data-testid="chat-tool-ventures"
-          className="mt-2.5 space-y-2 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-xs text-[#15102b]"
+          className="mt-2.5 space-y-2 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b]"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
             Hindara Labs SaaS Match
@@ -621,8 +636,9 @@ export function StudioChatbot({
       return (
         <div
           key={actionKey}
+          dir="ltr"
           data-testid="chat-tool-brief"
-          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-xs text-[#15102b]"
+          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b]"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
             Hire Brief Draft
@@ -682,8 +698,9 @@ export function StudioChatbot({
       return (
         <div
           key={actionKey}
+          dir="ltr"
           data-testid="chat-tool-video"
-          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-xs text-[#15102b]"
+          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b]"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
             Studio Film · {action.video.displayDuration}
@@ -732,10 +749,10 @@ export function StudioChatbot({
           className={`flex flex-col overflow-hidden rounded-3xl border border-[#d9d0f0] bg-[#fcfbff] shadow-2xl transition-all duration-150 ${
             expanded
               ? 'h-[min(680px,calc(100vh-2rem))] w-[min(540px,calc(100vw-2rem))]'
-              : 'h-[min(570px,calc(100vh-2rem))] w-[min(410px,calc(100vw-2rem))]'
+              : 'h-[min(590px,calc(100vh-2rem))] w-[min(410px,calc(100vw-2rem))]'
           }`}
         >
-          {/* Header + Mode Switcher */}
+          {/* Header + Language Bar + Mode Switcher */}
           <div className="border-b border-[#2e2352] bg-[#15102b] px-4 pt-3.5 pb-3 text-white">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
@@ -743,7 +760,7 @@ export function StudioChatbot({
                   Hindara Studio Assistant
                 </p>
                 <p className="truncate text-[11px] text-violet-200/80">
-                  Architecture scoping, live SaaS &amp; direct voice concierge
+                  Multilingual AI · Scope, Live SaaS &amp; Voice
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
@@ -779,32 +796,59 @@ export function StudioChatbot({
               </div>
             </div>
 
-            {/* Assistant Specialization Modes */}
-            <div
-              role="group"
-              aria-label="Assistant specialization mode"
-              className="mt-2.5 grid grid-cols-3 gap-1.5 rounded-xl bg-[#0e0a1e] p-1"
-            >
-              {MODE_OPTIONS.map((opt) => {
-                const active = mode === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    data-testid={`chat-mode-${opt.id}`}
-                    aria-pressed={active}
-                    onClick={() => setMode(opt.id)}
-                    title={opt.hint}
-                    className={`min-h-[30px] rounded-lg px-2 py-1 text-[11px] font-semibold whitespace-nowrap transition-colors ${
-                      active
-                        ? 'bg-[#5b21b6] text-white shadow-xs'
-                        : 'text-violet-200/80 hover:text-white'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
+            {/* Mode Switcher + Language Dropdown */}
+            <div className="mt-2.5 flex items-center gap-2">
+              <div
+                role="group"
+                aria-label="Assistant specialization mode"
+                className="grid flex-1 grid-cols-3 gap-1 rounded-xl bg-[#0e0a1e] p-1"
+              >
+                {MODE_OPTIONS.map((opt) => {
+                  const active = mode === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      data-testid={`chat-mode-${opt.id}`}
+                      aria-pressed={active}
+                      onClick={() => setMode(opt.id)}
+                      title={opt.hint}
+                      className={`min-h-[28px] rounded-lg px-1.5 py-1 text-[11px] font-semibold whitespace-nowrap transition-colors ${
+                        active
+                          ? 'bg-[#5b21b6] text-white shadow-xs'
+                          : 'text-violet-200/80 hover:text-white'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="relative shrink-0">
+                <label htmlFor="chat-language-select" className="sr-only">
+                  Assistant Language
+                </label>
+                <Globe
+                  className="pointer-events-none absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2 text-violet-300"
+                  aria-hidden="true"
+                />
+                <select
+                  id="chat-language-select"
+                  data-testid="chat-language-select"
+                  value={language}
+                  onChange={(e) =>
+                    handleLanguageChange(e.target.value as AssistantLanguageCode)
+                  }
+                  className="min-h-[34px] max-w-[116px] cursor-pointer rounded-xl border border-[#2e2352] bg-[#0e0a1e] pr-2 pl-7 text-[11px] font-semibold text-violet-100 focus:border-violet-400 focus:outline-none"
+                >
+                  {ASSISTANT_LANGUAGES.map((lang) => (
+                    <option key={lang.code} value={lang.code} className="bg-[#15102b] text-white">
+                      {lang.code === 'auto' ? 'Auto' : lang.nativeLabel}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -821,6 +865,9 @@ export function StudioChatbot({
                 const isSynthesizingThis = ttsLoadingId === msg.id;
                 const canListen =
                   msg.role === 'assistant' && msg.content.trim().length > 10 && !isLoading;
+                const rtlBubble =
+                  isRtlText(msg.content) ||
+                  (msg.id === 'welcome' && selectedLanguageObj.isRtl);
 
                 return (
                   <div
@@ -828,7 +875,10 @@ export function StudioChatbot({
                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
+                      dir={rtlBubble ? 'rtl' : 'ltr'}
                       className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 leading-relaxed ${
+                        rtlBubble ? 'text-right' : 'text-left'
+                      } ${
                         msg.role === 'user'
                           ? 'bg-[#5b21b6] text-white'
                           : 'border border-[#e3dcf5] bg-[#f6f3ff] text-[#15102b]'
@@ -848,7 +898,10 @@ export function StudioChatbot({
                         )}
 
                       {canListen && (
-                        <div className="mt-2 flex items-center justify-end border-t border-[#e8e2f6] pt-1.5">
+                        <div
+                          dir="ltr"
+                          className="mt-2 flex items-center justify-end border-t border-[#e8e2f6] pt-1.5"
+                        >
                           <button
                             type="button"
                             data-testid={`chat-listen-${msg.id}`}
@@ -883,19 +936,25 @@ export function StudioChatbot({
             {messages.length === 1 && !isLoading && (
               <div className="space-y-1.5 pt-1">
                 <p className="text-[11px] font-semibold tracking-wider text-[#5e567a] uppercase">
-                  {MODE_OPTIONS.find((m) => m.id === mode)?.hint} · Suggested Prompts
+                  {selectedLanguageObj.englishName} · Suggested Prompts
                 </p>
                 <div className="flex flex-col gap-1.5">
-                  {STARTER_PROMPTS_BY_MODE[mode].map((prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      onClick={() => void sendMessage(prompt)}
-                      className="rounded-xl border border-[#dcd4f0] bg-white px-3 py-2 text-left text-xs font-medium text-[#15102b] transition-colors hover:border-[#7c3aed] hover:bg-[#f6f3ff]"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
+                  {starterPrompts.map((prompt) => {
+                    const rtlPrompt = isRtlText(prompt);
+                    return (
+                      <button
+                        key={prompt}
+                        type="button"
+                        dir={rtlPrompt ? 'rtl' : 'ltr'}
+                        onClick={() => void sendMessage(prompt)}
+                        className={`rounded-xl border border-[#dcd4f0] bg-white px-3 py-2 text-xs font-medium text-[#15102b] transition-colors hover:border-[#7c3aed] hover:bg-[#f6f3ff] ${
+                          rtlPrompt ? 'text-right' : 'text-left'
+                        }`}
+                      >
+                        {prompt}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -935,15 +994,10 @@ export function StudioChatbot({
                 ref={inputRef}
                 id="studio-chat-input"
                 type="text"
+                dir={selectedLanguageObj.isRtl ? 'rtl' : 'auto'}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder={
-                  mode === 'architect'
-                    ? 'Describe platforms & integrations to scope...'
-                    : mode === 'brief-builder'
-                      ? 'Share timeline, budget, or project goals...'
-                      : 'Ask about our SaaS apps or hiring...'
-                }
+                placeholder={selectedLanguageObj.inputPlaceholder}
                 disabled={isLoading}
                 className="min-h-[40px] flex-1 rounded-xl border border-[#dcd4f0] bg-[#fcfbff] px-3 text-sm text-[#15102b] placeholder:text-[#8b83a8] focus:border-[#5b21b6] focus:outline-none disabled:opacity-60"
               />

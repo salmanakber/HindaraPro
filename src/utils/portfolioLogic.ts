@@ -493,11 +493,281 @@ export function sanitizeSpeechText(rawText: string, maxChars = 650): string {
 
   if (clean.length <= maxChars) return clean;
   const slice = clean.slice(0, maxChars);
-  const lastPeriod = slice.lastIndexOf('.');
+  const lastPeriod = Math.max(
+    slice.lastIndexOf('.'),
+    slice.lastIndexOf('۔'),
+    slice.lastIndexOf('।'),
+    slice.lastIndexOf('。')
+  );
   if (lastPeriod > maxChars * 0.55) {
     return slice.slice(0, lastPeriod + 1);
   }
   return `${slice.trim()}...`;
 }
+
+export type AssistantLanguageCode =
+  | 'auto'
+  | 'en'
+  | 'ur'
+  | 'ar'
+  | 'es'
+  | 'fr'
+  | 'de'
+  | 'hi'
+  | 'zh';
+
+export interface AssistantLanguageOption {
+  code: AssistantLanguageCode;
+  nativeLabel: string;
+  englishName: string;
+  isRtl: boolean;
+  welcomeMessage: string;
+  inputPlaceholder: string;
+}
+
+export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
+  {
+    code: 'auto',
+    nativeLabel: 'Auto-Detect (Any Language)',
+    englishName: 'Auto-Detect',
+    isRtl: false,
+    welcomeMessage: `Welcome to Hindara Labs. Chat in any language — ask about our six live SaaS products, request an architecture scope estimate, watch a studio film, or draft a project brief with ${FOUNDER_PROFILE.primaryName}.`,
+    inputPlaceholder: 'Ask in any language (English, اردو, العربية, Español...)',
+  },
+  {
+    code: 'en',
+    nativeLabel: 'English',
+    englishName: 'English',
+    isRtl: false,
+    welcomeMessage: `Welcome to Hindara Labs. Ask about our six live SaaS products, request an architecture scope estimate, watch a studio film, or draft a project brief directly with ${FOUNDER_PROFILE.primaryName}.`,
+    inputPlaceholder: 'Ask about our SaaS apps or hiring...',
+  },
+  {
+    code: 'ur',
+    nativeLabel: 'اردو (Urdu)',
+    englishName: 'Urdu',
+    isRtl: true,
+    welcomeMessage: `ہندارا لیبز (Hindara Labs) میں خوش آمدید۔ آپ ہمارے 6 لائیو SaaS پلیٹ فارمز، سافٹ ویئر آرکیٹیکچر، یا بانی ${FOUNDER_PROFILE.primaryName} کی خدمات حاصل کرنے کے بارے میں اردو میں بات کر سکتے ہیں۔`,
+    inputPlaceholder: 'اردو میں اپنا سوال یا پروجیکٹ کی تفصیل لکھیں...',
+  },
+  {
+    code: 'ar',
+    nativeLabel: 'العربية (Arabic)',
+    englishName: 'Arabic',
+    isRtl: true,
+    welcomeMessage: `مرحبًا بكم في Hindara Labs. اسأل باللغة العربية عن منتجاتنا الستة (SaaS) أو تقدير نطاق المشروع أو التواصل مباشرة مع المؤسس ${FOUNDER_PROFILE.primaryName}.`,
+    inputPlaceholder: 'اكتب سؤالك أو تفاصيل مشروعك بالعربية...',
+  },
+  {
+    code: 'es',
+    nativeLabel: 'Español',
+    englishName: 'Spanish',
+    isRtl: false,
+    welcomeMessage: `Bienvenido a Hindara Labs. Pregunta en español sobre nuestros seis productos SaaS activos, solicita una estimación técnica o prepara un brief de proyecto directamente con ${FOUNDER_PROFILE.primaryName}.`,
+    inputPlaceholder: 'Escribe tu consulta en español...',
+  },
+  {
+    code: 'fr',
+    nativeLabel: 'Français',
+    englishName: 'French',
+    isRtl: false,
+    welcomeMessage: `Bienvenue chez Hindara Labs. Posez vos questions en français sur nos six solutions SaaS, demandez un cadrage technique ou préparez un brief directement avec ${FOUNDER_PROFILE.primaryName}.`,
+    inputPlaceholder: 'Posez votre question en français...',
+  },
+  {
+    code: 'de',
+    nativeLabel: 'Deutsch',
+    englishName: 'German',
+    isRtl: false,
+    welcomeMessage: `Willkommen bei Hindara Labs. Fragen Sie auf Deutsch nach unseren sechs aktiven SaaS-Produkten, einer technischen Projektplanung oder einer direkten Zusammenarbeit mit ${FOUNDER_PROFILE.primaryName}.`,
+    inputPlaceholder: 'Stellen Sie Ihre Frage auf Deutsch...',
+  },
+  {
+    code: 'hi',
+    nativeLabel: 'हिन्दी (Hindi)',
+    englishName: 'Hindi',
+    isRtl: false,
+    welcomeMessage: `Hindara Labs में आपका स्वागत है। हमारे छह लाइव SaaS उत्पादों, तकनीकी आर्किटेक्चर या संस्थापक ${FOUNDER_PROFILE.primaryName} को हायर करने के बारे में हिन्दी में पूछें।`,
+    inputPlaceholder: 'हिन्दी में अपना प्रश्न या प्रोजेक्ट विवरण लिखें...',
+  },
+  {
+    code: 'zh',
+    nativeLabel: '中文 (Chinese)',
+    englishName: 'Chinese',
+    isRtl: false,
+    welcomeMessage: `欢迎来到 Hindara Labs。您可以用中文咨询我们旗下的六款上线 SaaS 产品、架构评估，或直接向创始人 ${FOUNDER_PROFILE.primaryName} 发起项目合作意向。`,
+    inputPlaceholder: '请用中文输入您的项目需求或问题...',
+  },
+];
+
+const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
+  Record<AssistantLanguageCode, Record<AssistantMode, string[]>>
+> = {
+  ur: {
+    advisor: [
+      'Shopify اسٹور کے لیے Hindara Labs کی کون سی ایپ بہتر ہے؟',
+      'TidyFlow اور TidyAgent کیا کام کرتے ہیں؟',
+      'Suleman Khan کو نئے SaaS پروجیکٹ کے لیے کیسے ہائر کریں؟',
+      'Hindara Labs کی برانڈ ویڈیوز دکھائیں',
+    ],
+    architect: [
+      'اگلے ماہ لانچ کے لیے Shopify وارنٹی ایپ اور React Native ایپ کا اسکوپ بتائیں',
+      'TidyFlow ویب، iOS اور Android پر کیسے کام کرتا ہے؟',
+      'StockSentry اور AfterSale OS کا موازنہ کریں',
+    ],
+    'brief-builder': [
+      '0→1 SaaS MVP کے لیے ہائرنگ بریف تیار کریں',
+      'React Native اور Shopify انٹیگریشن کے لیے بریف بنائیں',
+      'Fractional CTO کے لیے پروجیکٹ بریف تیار کریں',
+    ],
+  },
+  ar: {
+    advisor: [
+      'أي تطبيق من Hindara Labs يناسب متاجر Shopify؟',
+      'اشرح كيف يعمل TidyFlow و TidyAgent معًا',
+      'كيف يمكنني توظيف Suleman Khan لبناء منصة SaaS؟',
+      'أرني الفيديو التعريفي لاستوديو Hindara Labs',
+    ],
+    architect: [
+      'قدّر نطاق بناء تطبيق ضمان Shopify مع تطبيق جوال React Native',
+      'قارن بين بنية StockSentry و AfterSale OS',
+      'كيف تم تصميم TidyFlow على الويب و iOS و Android؟',
+    ],
+    'brief-builder': [
+      'جهز ملخص مشروع (Hire Brief) لإطلاق منصة SaaS خلال شهر',
+      'أعد مسودة مشروع لتكامل Shopify و React Native',
+      'جهز طلب استشارة Fractional CTO لتطوير منتجنا',
+    ],
+  },
+  es: {
+    advisor: [
+      '¿Qué producto de Hindara Labs encaja mejor con una tienda Shopify?',
+      'Explica qué hacen juntos TidyFlow y TidyAgent',
+      '¿Cómo puedo contratar a Suleman Khan para un SaaS MVP?',
+      'Muéstrame el video de presentación de Hindara Labs',
+    ],
+    architect: [
+      'Calcula el alcance de una app Shopify de garantías y app móvil React Native',
+      'Compara la arquitectura de StockSentry frente a AfterSale OS',
+      '¿Cómo funciona TidyFlow en Web, iOS y Android?',
+    ],
+    'brief-builder': [
+      'Prepara un Hire Brief para lanzar un SaaS MVP el próximo mes',
+      'Redacta un brief para app React Native y Shopify ($5k–$15k)',
+      'Configura una consulta de Fractional CTO para escalar nuestro SaaS',
+    ],
+  },
+  fr: {
+    advisor: [
+      'Quel SaaS de Hindara Labs convient à une boutique Shopify ?',
+      'Expliquez le rôle de TidyFlow et TidyAgent',
+      'Comment engager Suleman Khan pour un SaaS MVP ?',
+    ],
+    architect: [
+      'Estimez une application Shopify avec compagnon mobile React Native',
+      'Comparez StockSentry et AfterSale OS',
+    ],
+    'brief-builder': [
+      'Préparez un brief pour un SaaS MVP le mois prochain',
+      'Rédigez un brief Fractional CTO',
+    ],
+  },
+  de: {
+    advisor: [
+      'Welches SaaS von Hindara Labs passt zu einem Shopify-Shop?',
+      'Wie arbeiten TidyFlow und TidyAgent zusammen?',
+      'Wie kann ich Suleman Khan für ein SaaS-MVP beauftragen?',
+    ],
+    architect: [
+      'Umfang für eine Shopify-Garantie-App mit React Native App schätzen',
+      'Vergleiche StockSentry und AfterSale OS',
+    ],
+    'brief-builder': [
+      'Erstelle ein Hire Brief für einen 0→1 SaaS-Launch nächsten Monat',
+      'Fractional-CTO-Anfrage vorbereiten',
+    ],
+  },
+  hi: {
+    advisor: [
+      'Shopify स्टोर के लिए Hindara Labs का कौन सा SaaS सबसे सही है?',
+      'TidyFlow और TidyAgent क्या करते हैं?',
+      'Suleman Khan को SaaS MVP के लिए कैसे हायर करें?',
+    ],
+    architect: [
+      'Shopify वारंटी ऐप और React Native मोबाइल ऐप का स्कोप अनुमान बताएं',
+      'StockSentry और AfterSale OS की तुलना करें',
+    ],
+    'brief-builder': [
+      'अगले महीने लॉन्च के लिए SaaS MVP का Hire Brief तैयार करें',
+      'React Native और Shopify ऐप के लिए ब्रीफ बनाएं',
+    ],
+  },
+  zh: {
+    advisor: [
+      'Hindara Labs 的哪款 SaaS 最适合 Shopify 品牌？',
+      '请介绍 TidyFlow 和 TidyAgent 的核心功能',
+      '如何聘请 Suleman Khan 开发 SaaS MVP？',
+    ],
+    architect: [
+      '评估一个 Shopify 保修门户与 React Native 移动端的开发范围',
+      '对比 StockSentry 与 AfterSale OS 的架构设计',
+    ],
+    'brief-builder': [
+      '起草一份下个月上线的 0→1 SaaS MVP 合作需求书',
+      '准备一份 Fractional CTO 技术顾问合作简报',
+    ],
+  },
+};
+
+const ENGLISH_STARTER_PROMPTS: Record<AssistantMode, string[]> = {
+  advisor: [
+    'Which Hindara Labs SaaS fits a Shopify brand?',
+    'Explain what TidyFlow and TidyAgent do together',
+    'Show me the Hindara Labs brand film overview',
+    'How can I hire Suleman Khan for a SaaS MVP?',
+  ],
+  architect: [
+    'Scope a Shopify warranty app and React Native mobile companion',
+    'How is TidyFlow architected across Web, iOS & Android?',
+    'Estimate a 0→1 multi-tenant B2B SaaS with AI automation',
+    'Compare StockSentry vs AfterSale OS architecture',
+  ],
+  'brief-builder': [
+    'Prepare a Hire Brief for a 0→1 SaaS MVP launching next month',
+    'Draft a React Native & Shopify integration brief ($5k–$15k)',
+    'Set up a Fractional CTO inquiry for scaling our SaaS',
+    'I want to send an inquiry to Suleman Khan now',
+  ],
+};
+
+export function resolveAssistantLanguage(rawCode: unknown): AssistantLanguageOption {
+  const normalized = typeof rawCode === 'string' ? rawCode.trim().toLowerCase() : 'auto';
+  return (
+    ASSISTANT_LANGUAGES.find((lang) => lang.code === normalized) ?? ASSISTANT_LANGUAGES[0]
+  );
+}
+
+export function isRtlText(text: string): boolean {
+  // Arabic / Urdu / Hebrew Unicode blocks
+  return /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/.test(text);
+}
+
+export function getLocalizedStarterPrompts(
+  language: AssistantLanguageCode,
+  mode: AssistantMode
+): string[] {
+  if (language === 'auto') {
+    return [
+      'Which Hindara Labs SaaS fits a Shopify brand?',
+      'Explícame qué hacen TidyFlow y TidyAgent en español',
+      'اردو میں بتائیں کہ Suleman Khan کو کیسے ہائر کریں؟',
+      'Scope a Shopify warranty app and React Native mobile companion',
+    ];
+  }
+  return (
+    STARTER_PROMPTS_BY_LANG_AND_MODE[language]?.[mode] ?? ENGLISH_STARTER_PROMPTS[mode]
+  );
+}
+
 
 

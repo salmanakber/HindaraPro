@@ -2,13 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BRAND_VIDEOS, SAAS_VENTURES } from '../data/portfolio.ts';
 import {
+  ASSISTANT_LANGUAGES,
   buildBrandVideoFocusAction,
   buildHireBriefDraftAction,
   buildHireScopeSummary,
   buildScopeRecommendationAction,
   buildVentureSpotlightAction,
   filterVentures,
+  getLocalizedStarterPrompts,
+  isRtlText,
   recommendEngagementScope,
+  resolveAssistantLanguage,
   sanitizeSpeechText,
   validateHireBrief,
   type HireBriefInput,
@@ -211,4 +215,35 @@ test('BRAND_VIDEOS provide unique MP4 reels, captions, posters, and Suleman Khan
   assert.equal(posterUrls.size, 3);
   assert.equal(captionUrls.size, 3);
 });
+
+test('multilingual assistant configuration supports RTL, auto-detect, localized prompts, and Unicode TTS text', () => {
+  assert.ok(ASSISTANT_LANGUAGES.length >= 9);
+  assert.equal(resolveAssistantLanguage('unknown-code').code, 'auto');
+
+  const urdu = resolveAssistantLanguage('ur');
+  assert.equal(urdu.isRtl, true);
+  assert.equal(urdu.englishName, 'Urdu');
+
+  const spanish = resolveAssistantLanguage('es');
+  assert.equal(spanish.isRtl, false);
+  assert.equal(spanish.englishName, 'Spanish');
+
+  assert.equal(isRtlText('السلام علیکم'), true);
+  assert.equal(isRtlText('Hola desde Hindara Labs'), false);
+
+  const urduPrompts = getLocalizedStarterPrompts('ur', 'advisor');
+  assert.ok(urduPrompts.length >= 3);
+  assert.ok(urduPrompts.some((p) => isRtlText(p)));
+
+  const autoPrompts = getLocalizedStarterPrompts('auto', 'advisor');
+  assert.ok(autoPrompts.length >= 3);
+
+  const urduSpeech = sanitizeSpeechText(
+    '**TidyFlow** (https://tidyflowapp.com/) فیلڈ سروس کے لیے بہترین ہے۔'
+  );
+  assert.ok(urduSpeech.includes('فیلڈ سروس'));
+  assert.ok(urduSpeech.includes('tidyflowapp.com'));
+  assert.ok(!urduSpeech.includes('**'));
+});
+
 
