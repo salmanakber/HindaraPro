@@ -1,0 +1,8 @@
+{
+  "name": "Hindara Labs — Suleman Khan (Salman Akber)",
+  "description": "Hindara Labs is the SaaS venture studio founded by Suleman Khan (also known as Salman Akber), creator of TidyFlow, TidyAgent, TidySync, StockSentry, AfterSale OS, and SlotWise.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
