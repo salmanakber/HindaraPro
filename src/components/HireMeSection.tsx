@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
-import { ArrowDownRight, ArrowUpRight, Check, Copy, Loader2, Mail } from 'lucide-react';
+import { ArrowDownRight, ArrowRight, ArrowUpRight, Check, Copy, Loader2, Mail } from 'lucide-react';
 import {
   ENGAGEMENT_TRACKS,
   FOUNDER_PROFILE,
@@ -31,6 +31,7 @@ export interface ExternalBriefDraft {
 
 interface HireMeSectionProps {
   externalBriefDraft?: ExternalBriefDraft | null;
+  onNavigate?: (path: string, hash?: string) => void;
 }
 
 const INITIAL_INPUT: HireBriefInput = {
@@ -47,7 +48,7 @@ const SURFACE_OPTIONS: { id: BuildSurface; label: string }[] = [
   { id: 'web-saas', label: 'Web SaaS Platform' },
   { id: 'mobile-app', label: 'iOS & Android (React Native)' },
   { id: 'shopify-app', label: 'Shopify App / Store Sync' },
-  { id: 'ai-agent', label: 'AI Agent & Automation' },
+  { id: 'ai-agent', label: 'Webflow / Wix / Shopify AI Chatbot' },
 ];
 
 const STAGE_OPTIONS: { id: ProjectStage; label: string }[] = [
@@ -70,7 +71,7 @@ const DELIVERY_BLUEPRINT = [
   {
     step: '03',
     title: 'Mobile, Shopify & AI',
-    detail: 'React Native companions, Shopify webhooks, QuickBooks/Sheets sync, and AI agents.',
+    detail: 'React Native companions, Shopify webhooks, Webflow/Wix AI bots, and QuickBooks sync.',
   },
   {
     step: '04',
@@ -79,7 +80,7 @@ const DELIVERY_BLUEPRINT = [
   },
 ];
 
-export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
+export function HireMeSection({ externalBriefDraft, onNavigate }: HireMeSectionProps) {
   const [formInput, setFormInput] = useState<HireBriefInput>(INITIAL_INPUT);
   const [selectedSurfaces, setSelectedSurfaces] = useState<BuildSurface[]>(['web-saas']);
   const [projectStage, setProjectStage] = useState<ProjectStage>('idea-mvp');
@@ -215,42 +216,55 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
       {/* Engineering Capabilities Section */}
       <section
         id="capabilities"
-        className="scroll-mt-20 border-b border-[#e8e2f6] bg-[#f6f3ff] py-16 sm:py-24"
+        className="scroll-mt-20 border-b border-[#e6e2da] bg-[#f4f1ea] py-16 sm:py-24"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold tracking-wider text-[#5b21b6] uppercase sm:text-sm">
-              Engineering Capabilities
-            </p>
-            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#15102b] sm:text-4xl">
-              The exact stack powering six Hindara Labs products—
-              <span className="font-editorial text-[#6d28d9]">available for your build.</span>
-            </h2>
-            <p className="mt-3 text-base leading-relaxed text-[#4b4466]">
-              Instead of guessing with untested agencies, work directly with the founder
-              who architected TidyFlow, TidyAgent, TidySync, StockSentry, AfterSale OS,
-              and SlotWise.
-            </p>
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="font-mono text-xs font-medium tracking-widest text-[#524e4a] uppercase">
+                Engineering Services
+              </p>
+              <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#111015] sm:text-4xl">
+                The exact stack powering six Hindara Labs products—available for your build.
+              </h2>
+              <p className="mt-3 text-base leading-relaxed text-[#524e4a]">
+                Work directly with the founder who architected TidyFlow, TidyAgent, TidySync,
+                StockSentry, AfterSale OS, and SlotWise.
+              </p>
+            </div>
+            {onNavigate && (
+              <a
+                href="/services"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate('/services');
+                }}
+                className="inline-flex min-h-[42px] items-center gap-1.5 rounded-xl border border-[#d6d0c4] bg-white px-4 py-2 text-xs font-semibold text-[#111015] whitespace-nowrap shrink-0 transition-colors hover:border-[#111015]"
+              >
+                Full Services &amp; Rates Guide
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              </a>
+            )}
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
             {SERVICE_CAPABILITIES.map((cap) => (
               <div
                 key={cap.index}
-                className="flex flex-col justify-between rounded-3xl border border-[#e3dcf5] bg-[#fcfbff] p-6 shadow-xs sm:p-7"
+                className="flex flex-col justify-between rounded-2xl border border-[#e0dbd0] bg-white p-6 sm:p-7"
               >
                 <div>
-                  <h3 className="font-display text-lg font-bold text-[#15102b]">
-                    <span className="mr-2 font-mono text-sm text-[#6d28d9] tabular-nums">
+                  <h3 className="font-display text-lg font-bold text-[#111015]">
+                    <span className="mr-2 font-mono text-sm text-[#5b21b6] tabular-nums">
                       {cap.index}.
                     </span>
                     {cap.title}
                   </h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-[#4b4466]">
+                  <p className="mt-2.5 text-sm leading-relaxed text-[#524e4a]">
                     {cap.description}
                   </p>
                 </div>
-                <p className="mt-5 border-t border-[#e8e2f6] pt-3.5 font-mono text-xs text-[#5e567a]">
+                <p className="mt-5 border-t border-[#efece5] pt-3.5 font-mono text-xs text-[#6d6861]">
                   {cap.stack}
                 </p>
               </div>
@@ -258,25 +272,25 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
           </div>
 
           {/* 4-Phase Studio Delivery Blueprint */}
-          <div className="mt-10 rounded-3xl border border-[#e3dcf5] bg-[#fcfbff] p-6 sm:p-8">
+          <div className="mt-10 rounded-2xl border border-[#e0dbd0] bg-white p-6 sm:p-8">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-              <h3 className="font-display text-lg font-bold text-[#15102b]">
+              <h3 className="font-display text-lg font-bold text-[#111015]">
                 How Hindara Labs ships from blueprint to production
               </h3>
-              <p className="font-mono text-xs text-[#5e567a]">
+              <p className="font-mono text-xs text-[#524e4a]">
                 Weekly demos · Direct founder access
               </p>
             </div>
-            <div className="mt-6 grid grid-cols-1 gap-6 border-t border-[#e8e2f6] pt-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-6 border-t border-[#efece5] pt-6 sm:grid-cols-2 lg:grid-cols-4">
               {DELIVERY_BLUEPRINT.map((phase) => (
                 <div key={phase.step}>
-                  <p className="font-mono text-xs font-semibold text-[#6d28d9] tabular-nums">
+                  <p className="font-mono text-xs font-semibold text-[#5b21b6] tabular-nums">
                     Phase {phase.step}
                   </p>
-                  <h4 className="mt-1.5 font-display text-sm font-bold text-[#15102b]">
+                  <h4 className="mt-1.5 font-display text-sm font-bold text-[#111015]">
                     {phase.title}
                   </h4>
-                  <p className="mt-1.5 text-xs leading-relaxed text-[#4b4466]">
+                  <p className="mt-1.5 text-xs leading-relaxed text-[#524e4a]">
                     {phase.detail}
                   </p>
                 </div>
@@ -289,24 +303,17 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
       {/* Strong SEO Hire Me Section */}
       <section
         id="hire-me"
-        className="scroll-mt-20 relative overflow-hidden border-b border-[#2e2352] bg-[#15102b] py-16 text-white sm:py-24"
+        className="scroll-mt-20 border-b border-[#26252c] bg-[#141418] py-16 text-white sm:py-24"
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-24 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.22)_0%,rgba(21,16,43,0)_70%)]"
-        />
-
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold tracking-wider text-violet-300 uppercase sm:text-sm">
-              Hire {FOUNDER_PROFILE.primaryName} · Hindara Labs
+            <p className="font-mono text-xs font-medium tracking-widest text-neutral-400 uppercase">
+              Hire {FOUNDER_PROFILE.primaryName} · Direct Studio Channel
             </p>
             <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Hire a multi-SaaS founder to{' '}
-              <span className="font-editorial text-violet-300">architect and ship</span>{' '}
-              your next product.
+              Hire a multi-SaaS founder to architect and ship your next product.
             </h2>
-            <p className="mt-3 text-base leading-relaxed text-violet-100/80">
+            <p className="mt-3 text-base leading-relaxed text-neutral-300">
               Select an engagement model below and submit your project brief. Inquiries are
               delivered straight to {FOUNDER_PROFILE.primaryName} at{' '}
               <a
@@ -322,7 +329,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
           {/* Interactive Project Scope Configurator */}
           <div
             data-testid="scope-configurator"
-            className="mt-9 rounded-3xl border border-[#2e2352] bg-[#1b1438] p-6 sm:p-7"
+            className="mt-9 rounded-2xl border border-[#2a2932] bg-[#19191f] p-6 sm:p-7"
           >
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
               <div className="space-y-4 lg:col-span-7">
@@ -330,14 +337,14 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <p className="font-mono text-xs font-semibold tracking-wider text-violet-300 uppercase">
                     Interactive Scope Estimator
                   </p>
-                  <p className="mt-1 text-sm text-violet-100/80">
+                  <p className="mt-1 text-sm text-neutral-300">
                     Select the platforms and current stage you need to preview a tailored
                     engagement track.
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-violet-200">
+                  <p className="text-xs font-semibold text-neutral-200">
                     1. Target Surfaces
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -349,10 +356,10 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                           type="button"
                           onClick={() => toggleSurface(opt.id)}
                           aria-pressed={active}
-                          className={`min-h-[38px] rounded-xl border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
+                          className={`min-h-[38px] rounded-lg border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
                             active
                               ? 'border-violet-400 bg-[#5b21b6] text-white'
-                              : 'border-[#33275d] bg-[#15102b] text-violet-200 hover:border-violet-500/60'
+                              : 'border-[#2f2e38] bg-[#141418] text-neutral-300 hover:border-neutral-500'
                           }`}
                         >
                           {opt.label}
@@ -363,7 +370,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-violet-200">
+                  <p className="text-xs font-semibold text-neutral-200">
                     2. Project Stage
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -378,10 +385,10 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                             setScopeAppliedToast(false);
                           }}
                           aria-pressed={active}
-                          className={`min-h-[38px] rounded-xl border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
+                          className={`min-h-[38px] rounded-lg border px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
                             active
-                              ? 'border-violet-400 bg-white text-[#15102b]'
-                              : 'border-[#33275d] bg-[#15102b] text-violet-200 hover:border-violet-500/60'
+                              ? 'border-white bg-white text-[#111015]'
+                              : 'border-[#2f2e38] bg-[#141418] text-neutral-300 hover:border-neutral-500'
                           }`}
                         >
                           {opt.label}
@@ -392,7 +399,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-2xl border border-[#33275d] bg-[#15102b] p-5 lg:col-span-5">
+              <div className="flex flex-col justify-between rounded-xl border border-[#2f2e38] bg-[#141418] p-5 lg:col-span-5">
                 <div>
                   <p className="font-mono text-xs text-violet-300 tabular-nums">
                     Recommended · {scopeRecommendation.estimatedWeeks}
@@ -400,14 +407,14 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <h3 className="mt-1.5 font-display text-lg font-bold text-white">
                     {scopeRecommendation.trackTitle}
                   </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-violet-100/80">
+                  <p className="mt-2 text-xs leading-relaxed text-neutral-300">
                     {scopeRecommendation.architectureFocus}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={applyRecommendedScope}
-                  className="mt-4 inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-[#15102b] whitespace-nowrap shrink-0 transition-colors hover:bg-violet-100"
+                  className="mt-4 inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-lg bg-white px-4 py-2 text-xs font-semibold text-[#111015] whitespace-nowrap shrink-0 transition-colors hover:bg-neutral-200"
                 >
                   {scopeAppliedToast ? (
                     <>
@@ -439,16 +446,16 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   type="button"
                   onClick={() => handleTrackSelect(track.id)}
                   aria-pressed={selected}
-                  className={`flex flex-col justify-between rounded-3xl border p-6 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 ${
+                  className={`flex flex-col justify-between rounded-2xl border p-6 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 ${
                     selected
-                      ? 'border-violet-400 bg-[#221a45] shadow-lg'
-                      : 'border-[#2e2352] bg-[#1b1438] hover:border-violet-500/50'
+                      ? 'border-violet-400 bg-[#201c2d]'
+                      : 'border-[#2a2932] bg-[#19191f] hover:border-neutral-600'
                   }`}
                 >
                   <div>
                     <p className="font-mono text-xs text-violet-300">
                       <span>{track.index}</span>
-                      <span aria-hidden="true" className="mx-2 text-violet-500">
+                      <span aria-hidden="true" className="mx-2 text-neutral-600">
                         ·
                       </span>
                       <span>{track.cadence}</span>
@@ -456,11 +463,11 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                     <h3 className="mt-2 font-display text-lg font-bold text-white">
                       {track.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-violet-100/75">
+                    <p className="mt-2 text-sm leading-relaxed text-neutral-300">
                       {track.description}
                     </p>
                   </div>
-                  <p className="mt-4 border-t border-[#2e2352] pt-3 text-xs font-medium text-violet-300/75">
+                  <p className="mt-4 border-t border-[#2a2932] pt-3 text-xs font-medium text-neutral-400">
                     Ideal for: <span className="text-white">{track.idealFor}</span>
                   </p>
                 </button>
@@ -469,22 +476,22 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
           </div>
 
           {/* Interactive Hire Brief Form OR Submitted Confirmation Card */}
-          <div className="mt-8 rounded-3xl border border-[#e3dcf5] bg-[#fcfbff] p-6 text-[#15102b] shadow-2xl sm:p-8">
+          <div className="mt-8 rounded-2xl border border-[#e6e2da] bg-[#faf9f6] p-6 text-[#111015] shadow-2xl sm:p-8">
             {submittedState ? (
               <div data-testid="hire-brief-confirmation">
-                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#e8e2f6] pb-5">
+                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#e6e2da] pb-5">
                   <div>
                     <p className="font-mono text-xs font-semibold text-[#5b21b6] tabular-nums">
                       {submittedState.emailed
                         ? `Email Sent · Reference ${submittedState.summary.briefId}`
                         : `Inquiry Recorded · Reference ${submittedState.summary.briefId}`}
                     </p>
-                    <h3 className="mt-1 font-display text-2xl font-bold text-[#15102b]">
+                    <h3 className="mt-1 font-display text-2xl font-bold text-[#111015]">
                       {submittedState.emailed
                         ? `Your project brief has been emailed to ${FOUNDER_PROFILE.primaryName}.`
                         : `Your project brief for ${FOUNDER_PROFILE.primaryName} is ready.`}
                     </h3>
-                    <p className="mt-1 text-sm text-[#524b6b]">
+                    <p className="mt-1 text-sm text-[#524e4a]">
                       {submittedState.emailed
                         ? `Delivered directly to ${submittedState.recipientEmail} with Reply-To set to ${submittedState.summary.clientEmail}.`
                         : `Saved with reference ${submittedState.summary.briefId}. Click below to send directly via your email client or copy the brief text for ${submittedState.recipientEmail}.`}
@@ -493,7 +500,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="min-h-[40px] rounded-xl border border-[#dcd4f0] bg-white px-4 py-2 text-xs font-semibold text-[#15102b] hover:bg-[#f6f3ff]"
+                    className="min-h-[40px] rounded-xl border border-[#d6d0c4] bg-white px-4 py-2 text-xs font-semibold text-[#111015] hover:bg-[#f4f1ea]"
                   >
                     Start Another Brief
                   </button>
@@ -502,32 +509,32 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                 <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-2.5 text-sm">
                     <p>
-                      <span className="font-semibold text-[#3b3454]">Client: </span>
+                      <span className="font-semibold text-[#2d2a27]">Client: </span>
                       {submittedState.summary.clientName} ({submittedState.summary.clientEmail})
                     </p>
                     <p>
-                      <span className="font-semibold text-[#3b3454]">Venture: </span>
+                      <span className="font-semibold text-[#2d2a27]">Venture: </span>
                       {submittedState.summary.companyOrProject}
                     </p>
                     <p>
-                      <span className="font-semibold text-[#3b3454]">Track: </span>
+                      <span className="font-semibold text-[#2d2a27]">Track: </span>
                       {submittedState.summary.trackTitle} ({submittedState.summary.cadence})
                     </p>
                     <p>
-                      <span className="font-semibold text-[#3b3454]">Timeline: </span>
+                      <span className="font-semibold text-[#2d2a27]">Timeline: </span>
                       {submittedState.summary.timelineLabel}
                     </p>
                     <p>
-                      <span className="font-semibold text-[#3b3454]">Budget: </span>
+                      <span className="font-semibold text-[#2d2a27]">Budget: </span>
                       {submittedState.summary.budgetLabel}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-[#e3dcf5] bg-[#f6f3ff] p-4">
-                    <h4 className="font-display text-sm font-bold text-[#15102b]">
+                  <div className="rounded-xl border border-[#e6e2da] bg-white p-4">
+                    <h4 className="font-display text-sm font-bold text-[#111015]">
                       Included Track Deliverables
                     </h4>
-                    <ul className="mt-2.5 space-y-2 text-sm text-[#3b3454]">
+                    <ul className="mt-2.5 space-y-2 text-sm text-[#2d2a27]">
                       {submittedState.summary.deliverables.map((item) => (
                         <li key={item} className="flex items-start gap-2">
                           <Check
@@ -541,7 +548,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-[#e8e2f6] pt-5">
+                <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-[#e6e2da] pt-5">
                   <a
                     href={submittedState.summary.mailtoHref}
                     className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[#5b21b6] px-5 py-2.5 text-sm font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#4c1d95]"
@@ -553,7 +560,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <button
                     type="button"
                     onClick={handleCopyBrief}
-                    className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-[#dcd4f0] bg-white px-4 py-2.5 text-sm font-semibold text-[#15102b] whitespace-nowrap shrink-0 transition-colors hover:bg-[#f6f3ff]"
+                    className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-[#d6d0c4] bg-white px-4 py-2.5 text-sm font-semibold text-[#111015] whitespace-nowrap shrink-0 transition-colors hover:bg-[#f4f1ea]"
                   >
                     <Copy className="h-4 w-4" aria-hidden="true" />
                     {copiedBrief ? 'Copied Brief' : 'Copy Project Brief'}
@@ -562,23 +569,23 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
               </div>
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                <div className="flex flex-col gap-1 border-b border-[#e8e2f6] pb-4 sm:flex-row sm:items-center sm:justify-between">
-                  <h3 className="font-display text-xl font-bold text-[#15102b]">
+                <div className="flex flex-col gap-1 border-b border-[#e6e2da] pb-4 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="font-display text-xl font-bold text-[#111015]">
                     Send a Hire Inquiry
                   </h3>
-                  <p className="text-xs font-medium text-[#524b6b]">
+                  <p className="text-xs font-medium text-[#524e4a]">
                     Selected track:{' '}
                     <span className="font-semibold text-[#5b21b6]">
-                      {
-                        ENGAGEMENT_TRACKS.find((t) => t.id === formInput.trackId)
-                          ?.title
-                      }
+                      {ENGAGEMENT_TRACKS.find((t) => t.id === formInput.trackId)?.title}
                     </span>
                   </p>
                 </div>
 
                 {submitError && (
-                  <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  <p
+                    role="alert"
+                    className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                  >
                     {submitError}
                   </p>
                 )}
@@ -587,7 +594,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <div>
                     <label
                       htmlFor="hire-name"
-                      className="block text-sm font-semibold text-[#15102b]"
+                      className="block text-sm font-semibold text-[#111015]"
                     >
                       Your Name
                     </label>
@@ -603,7 +610,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                         }))
                       }
                       placeholder="Alex Rivera"
-                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#dcd4f0] bg-white px-3.5 text-sm text-[#15102b] focus:border-[#5b21b6] focus:outline-none"
+                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#d6d0c4] bg-white px-3.5 text-sm text-[#111015] focus:border-[#5b21b6] focus:outline-none"
                     />
                     {errors.clientName && (
                       <p role="alert" className="mt-1 text-xs font-medium text-red-600">
@@ -615,7 +622,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <div>
                     <label
                       htmlFor="hire-email"
-                      className="block text-sm font-semibold text-[#15102b]"
+                      className="block text-sm font-semibold text-[#111015]"
                     >
                       Work Email
                     </label>
@@ -631,7 +638,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                         }))
                       }
                       placeholder="alex@company.com"
-                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#dcd4f0] bg-white px-3.5 text-sm text-[#15102b] focus:border-[#5b21b6] focus:outline-none"
+                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#d6d0c4] bg-white px-3.5 text-sm text-[#111015] focus:border-[#5b21b6] focus:outline-none"
                     />
                     {errors.clientEmail && (
                       <p role="alert" className="mt-1 text-xs font-medium text-red-600">
@@ -643,7 +650,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <div>
                     <label
                       htmlFor="hire-company"
-                      className="block text-sm font-semibold text-[#15102b]"
+                      className="block text-sm font-semibold text-[#111015]"
                     >
                       Company or Venture Name
                     </label>
@@ -658,7 +665,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                         }))
                       }
                       placeholder="Optional"
-                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#dcd4f0] bg-white px-3.5 text-sm text-[#15102b] focus:border-[#5b21b6] focus:outline-none"
+                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#d6d0c4] bg-white px-3.5 text-sm text-[#111015] focus:border-[#5b21b6] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -667,7 +674,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <div>
                     <label
                       htmlFor="hire-timeline"
-                      className="block text-sm font-semibold text-[#15102b]"
+                      className="block text-sm font-semibold text-[#111015]"
                     >
                       Target Timeline
                     </label>
@@ -680,7 +687,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                           timeline: e.target.value as HireBriefInput['timeline'],
                         }))
                       }
-                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#dcd4f0] bg-white px-3.5 text-sm text-[#15102b] focus:border-[#5b21b6] focus:outline-none"
+                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#d6d0c4] bg-white px-3.5 text-sm text-[#111015] focus:border-[#5b21b6] focus:outline-none"
                     >
                       <option value="immediate">Immediate Kickoff (This Week)</option>
                       <option value="next-month">Within 2–4 Weeks</option>
@@ -691,7 +698,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <div>
                     <label
                       htmlFor="hire-budget"
-                      className="block text-sm font-semibold text-[#15102b]"
+                      className="block text-sm font-semibold text-[#111015]"
                     >
                       Project Budget / Retainer
                     </label>
@@ -704,7 +711,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                           budgetRange: e.target.value as HireBriefInput['budgetRange'],
                         }))
                       }
-                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#dcd4f0] bg-white px-3.5 text-sm text-[#15102b] focus:border-[#5b21b6] focus:outline-none"
+                      className="mt-1.5 min-h-[42px] w-full rounded-xl border border-[#d6d0c4] bg-white px-3.5 text-sm text-[#111015] focus:border-[#5b21b6] focus:outline-none"
                     >
                       <option value="under-5k">$2,500 – $5,000 (Focused Sprint)</option>
                       <option value="5k-15k">$5,000 – $15,000 (MVP / Shopify / Mobile)</option>
@@ -717,7 +724,7 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                 <div>
                   <label
                     htmlFor="hire-goals"
-                    className="block text-sm font-semibold text-[#15102b]"
+                    className="block text-sm font-semibold text-[#111015]"
                   >
                     What are you building?
                   </label>
@@ -732,8 +739,8 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                         projectGoals: e.target.value,
                       }))
                     }
-                    placeholder="Share your core product problem, target users, required platforms (Web, React Native, Shopify), or key integrations..."
-                    className="mt-1.5 w-full rounded-xl border border-[#dcd4f0] bg-white p-3.5 text-sm text-[#15102b] focus:border-[#5b21b6] focus:outline-none"
+                    placeholder="Share your core product problem, target users, required platforms (Web SaaS, React Native, Shopify, Webflow/Wix AI), or key integrations..."
+                    className="mt-1.5 w-full rounded-xl border border-[#d6d0c4] bg-white p-3.5 text-sm text-[#111015] focus:border-[#5b21b6] focus:outline-none"
                   />
                   {errors.projectGoals && (
                     <p role="alert" className="mt-1 text-xs font-medium text-red-600">
@@ -746,16 +753,16 @@ export function HireMeSection({ externalBriefDraft }: HireMeSectionProps) {
                   <button
                     type="submit"
                     disabled={isSending}
-                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#5b21b6] px-6 py-2.5 text-sm font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#4c1d95] disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b21b6]"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#111015] px-6 py-2.5 text-sm font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#5b21b6] disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b21b6]"
                   >
                     {isSending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
                     {isSending ? 'Sending Hire Inquiry...' : 'Send Hire Inquiry & Brief'}
                   </button>
-                  <p className="text-xs text-[#5e567a]">
+                  <p className="text-xs text-[#524e4a]">
                     Direct email:{' '}
                     <a
                       href={`mailto:${FOUNDER_PROFILE.email}`}
-                      className="font-semibold text-[#15102b] hover:underline"
+                      className="font-semibold text-[#111015] hover:underline"
                     >
                       {FOUNDER_PROFILE.email}
                     </a>

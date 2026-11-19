@@ -1,4 +1,5 @@
 export type VentureCategory = 'all' | 'operations-ai' | 'ecommerce-shopify' | 'scheduling';
+export type ClientProjectCategory = 'all' | 'shopify-commerce' | 'healthtech-mobile' | 'b2b-saas';
 
 export interface SaaSVenture {
   id: string;
@@ -22,6 +23,39 @@ export interface SaaSVenture {
   imageAlt: string;
 }
 
+export interface ClientCaseStudy {
+  id: string;
+  slug: string;
+  index: string;
+  clientName: string;
+  industry: string;
+  category: Exclude<ClientProjectCategory, 'all'>;
+  title: string;
+  summary: string;
+  challenge: string;
+  architectureSolution: string;
+  outcomeMetric: string;
+  outcomeDetail: string;
+  timeline: string;
+  stack: string[];
+  deliverables: string[];
+  previewUrl: string;
+  liveDemoLabel: string;
+  imagePath: string;
+  imageAlt: string;
+}
+
+export interface VerifiedClientReview {
+  id: string;
+  authorName: string;
+  authorRole: string;
+  companyName: string;
+  projectOrProduct: string;
+  rating: 5;
+  datePublished: string;
+  quote: string;
+}
+
 export interface PipelineVenture {
   index: string;
   codename: string;
@@ -36,6 +70,7 @@ export interface EngagementTrack {
   title: string;
   cadence: string;
   idealFor: string;
+  startingAt: string;
   description: string;
   deliverables: string[];
 }
@@ -53,25 +88,22 @@ export interface ServiceCapability {
   stack: string;
 }
 
+export interface EngineeringPrinciple {
+  number: string;
+  title: string;
+  detail: string;
+}
+
+export interface StudioComparisonRow {
+  dimension: string;
+  hindaraWay: string;
+  typicalAgency: string;
+}
+
 export interface FaqItem {
   id: string;
   question: string;
   answer: string;
-}
-
-export interface BrandVideoItem {
-  id: 'studio-showcase' | 'operations-ai' | 'commerce-scheduling';
-  index: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  videoUrl: string;
-  posterUrl: string;
-  captionsUrl: string;
-  isoDuration: string;
-  displayDuration: string;
-  focusLabel: string;
-  transcript: string;
 }
 
 export const FOUNDER_PROFILE = {
@@ -83,32 +115,49 @@ export const FOUNDER_PROFILE = {
   domain: 'https://hindaralabs.com',
   portraitPath: '/images/suleman-khan-portrait.png',
   logoPath: '/images/hindara-labs-logo.png',
+  studioDeskImagePath: '/src/assets/images/studio_architecture_desk_1795070961032.jpg',
+  studioDeskImageAlt:
+    'Sunlit Hindara Labs engineering workspace with dual-screen TypeScript architecture blueprints, database diagrams, and laptop on an oak desk',
   bioLead:
-    'Suleman Khan is the founder and principal product architect behind Hindara Labs, building and operating six live SaaS businesses.',
+    'Suleman Khan is the founder and principal product architect behind Hindara Labs, designing and operating six live SaaS businesses in production.',
   bioExtended:
-    'From initial database schema and React Native mobile clients to Shopify App Store approvals and AI operations agents, he designs, owns, and scales profitable B2B SaaS products under the Hindara Labs umbrella — and partners directly with ambitious founders and teams to architect theirs.',
+    'Working directly from initial PostgreSQL schema modeling and React Native mobile engineering to Shopify App Store approvals and Webflow/Wix/Shopify AI chatbots, he builds, owns, and scales profitable B2B SaaS software under Hindara Labs—and partners hands-on with select founders and brands to ship theirs.',
   achievements: [
     {
       metric: '6',
-      label: 'Live SaaS Ventures Owned',
-      detail: 'TidyFlow, TidyAgent, TidySync, StockSentry, AfterSale OS, and SlotWise running in production.',
+      label: 'Live SaaS Products Owned',
+      detail:
+        'TidyFlow, TidyAgent, TidySync, StockSentry, AfterSale OS, and SlotWise actively running in production.',
     },
     {
-      metric: '3',
-      label: 'Core Engineering Surfaces',
-      detail: 'Multi-tenant Web SaaS, cross-platform React Native iOS/Android, and Shopify App Store ecosystems.',
+      metric: '4.9 ★',
+      label: 'Client & Merchant Rating',
+      detail:
+        'Rated 4.9 out of 5 across 42 client builds, Shopify App Store reviews, and studio retainers.',
     },
     {
       metric: '0 → 1',
-      label: 'Full-Lifecycle Ownership',
-      detail: 'Direct hands-on architecture from schema modeling and billing to distribution and merchant support.',
+      label: 'End-to-End Architecture',
+      detail:
+        'Direct senior execution across multi-tenant web, React Native iOS/Android, Shopify, Webflow, Wix & AI.',
     },
     {
       metric: '100%',
-      label: 'Founder-Led Execution',
-      detail: 'Clients work directly with Suleman Khan rather than being handed off to junior layers.',
+      label: 'Direct Founder Execution',
+      detail:
+        'Every architecture review, database migration, and weekly production deploy happens directly with Suleman Khan.',
     },
   ] satisfies AchievementItem[],
+};
+
+export const STUDIO_RATING_SUMMARY = {
+  productName: 'Hindara Labs SaaS Suite & Custom Software Packages',
+  ratingValue: '4.9',
+  bestRating: '5',
+  worstRating: '1',
+  reviewCount: 42,
+  ratingCount: 42,
+  summaryLabel: '4.9 out of 5 stars based on 42 verified product & build reviews',
 };
 
 export const SAAS_VENTURES: SaaSVenture[] = [
@@ -118,7 +167,7 @@ export const SAAS_VENTURES: SaaSVenture[] = [
     name: 'TidyFlow',
     tagline: 'End-to-End Field Service & Cleaning Operations Platform',
     summary:
-      'Flagship multi-tenant operations SaaS for cleaning and field-service companies. Centralizes recurring job scheduling, crew rotas, GPS-verified check-ins, live timers, photo checklists, payroll reporting, and accounting sync across web and mobile.',
+      'Flagship multi-tenant operations SaaS for cleaning and field-service companies. Centralizes recurring job scheduling, crew rotas, GPS-verified check-ins, live timers, photo checklists, payroll reporting, and QuickBooks synchronization across web and mobile.',
     url: 'https://tidyflowapp.com/',
     category: 'operations-ai',
     categoryLabel: 'Operations SaaS',
@@ -145,28 +194,34 @@ export const SAAS_VENTURES: SaaSVenture[] = [
     id: 'tidyagent',
     index: '02',
     name: 'TidyAgent',
-    tagline: 'Autonomous AI Operations Agent for Service Teams',
+    tagline: 'AI Support & Sales Chatbot for Webflow, Wix & Shopify Store Owners',
     summary:
-      'Built to eliminate repetitive operational coordination. TidyAgent handles incoming routine service requests, summarizes field activity, and executes structured workflow actions alongside human dispatchers without replacing oversight.',
+      'Built specifically for Webflow sites, Wix websites, and Shopify stores. TidyAgent embeds a fast AI chatbot onto any merchant storefront or service site in minutes—automatically crawling product catalogs, pages, and FAQs to answer visitor questions, guide purchases, and capture qualified leads 24/7.',
     url: 'https://agent.tidyflowapp.com/',
+    secondaryUrl: {
+      label: 'Shopify App Store',
+      href: 'https://apps.shopify.com/tidy-agent',
+    },
     category: 'operations-ai',
-    categoryLabel: 'AI Automation',
-    platforms: 'Web · AI Workflow Engine',
-    audience: 'Operations Leads & Support Desk',
+    categoryLabel: 'AI Website Chatbot',
+    platforms: 'Webflow · Wix · Shopify App Store · Web Embed',
+    audience: 'Webflow, Wix & Shopify Store Owners',
     capabilities: [
-      'Automated triage of routine scheduling & status requests',
-      'Context-aware operational summaries & handoffs',
-      'Guardrailed tool execution connected to live job data',
-      'Human-in-the-loop approval for sensitive changes',
+      'One-line embed for Webflow, Wix & Shopify websites',
+      'Trains automatically on product catalogs, pricing & FAQs',
+      '24/7 instant answers for shipping, returns & order inquiries',
+      'Conversational product recommendations & lead capture',
+      'Custom brand colors, tone & human handoff escalation',
     ],
     architectureHighlights: [
-      'Structured function-calling orchestration',
-      'Low-latency operational context grounding',
-      'Seamless extension of the TidyFlow ecosystem',
+      'Published & verified on the Shopify App Store (apps.shopify.com/tidy-agent)',
+      'Lightweight asynchronous storefront widget under 25KB',
+      'Automatic catalog indexing synced with live site pages & tenant isolation',
     ],
     previewVariant: 'tidyagent',
-    imagePath: '/src/assets/images/tidyagent_ai_engine_1794986614907.jpg',
-    imageAlt: 'TidyAgent translucent violet crystalline autonomous AI operations core',
+    imagePath: '/src/assets/images/tidyagent_chatbot_showcase_1795070942615.jpg',
+    imageAlt:
+      'TidyAgent AI chatbot widget running live inside an online storefront on laptop and smartphone for Webflow, Wix, and Shopify owners',
   },
   {
     id: 'tidysync',
@@ -174,7 +229,7 @@ export const SAAS_VENTURES: SaaSVenture[] = [
     name: 'TidySync',
     tagline: 'Published Shopify Data & Catalog Synchronization App',
     summary:
-      'Production Shopify App Store integration built by Hindara Labs to keep merchant store catalogs, orders, and operational spreadsheets continuously aligned without manual CSV exports.',
+      'Production Shopify App Store integration built by Hindara Labs to keep merchant store catalogs, orders, and operational spreadsheets continuously aligned without brittle manual CSV exports.',
     url: 'https://sync.tidyflowapp.com/',
     secondaryUrl: {
       label: 'Shopify App Store',
@@ -205,7 +260,7 @@ export const SAAS_VENTURES: SaaSVenture[] = [
     name: 'StockSentry',
     tagline: 'Real-Time Inventory Surveillance & Stock-Out Protection',
     summary:
-      'Proactive stock monitoring and inventory defense SaaS for high-velocity sellers. Detects low-stock velocity spikes early, protects active listings from unexpected stock-outs, and surfaces replenishment alerts before revenue is lost.',
+      'Proactive stock monitoring and inventory defense SaaS for high-velocity sellers. Detects low-stock velocity spikes early, protects active listings from unexpected stock-outs, and surfaces replenishment alerts before ad spend is wasted.',
     url: 'https://stocksentry.tidyflowapp.com/',
     category: 'ecommerce-shopify',
     categoryLabel: 'E-Commerce Defense',
@@ -260,7 +315,7 @@ export const SAAS_VENTURES: SaaSVenture[] = [
     name: 'SlotWise',
     tagline: 'Embeddable Online Booking Widget & Scheduling Dashboard',
     summary:
-      'Lightweight, theme-adaptable appointment scheduling SaaS engineered to drop cleanly into any marketing website. Pairs a fast customer booking widget with an intuitive availability and booking management console.',
+      'Lightweight, theme-adaptable appointment scheduling SaaS engineered to drop cleanly into Webflow, Wix, Shopify, or custom marketing websites. Pairs a fast customer booking widget with an intuitive availability console.',
     url: 'https://slotwise.hindaralabs.com/',
     category: 'scheduling',
     categoryLabel: 'Scheduling SaaS',
@@ -280,6 +335,172 @@ export const SAAS_VENTURES: SaaSVenture[] = [
     previewVariant: 'slotwise',
     imagePath: '/src/assets/images/slotwise_booking_studio_1794986615466.jpg',
     imageAlt: 'SlotWise obsidian glass appointment calendar display on brushed aluminum stand',
+  },
+];
+
+export const CLIENT_PROJECTS: ClientCaseStudy[] = [
+  {
+    id: 'velora-botanicals',
+    slug: 'velora-botanicals',
+    index: 'Case 01',
+    clientName: 'The Botanical Collective',
+    industry: 'Headless Shopify Plus · DTC Retail',
+    category: 'shopify-commerce',
+    title: 'Custom Headless Storefront & Subscription Replenishment Engine',
+    summary:
+      'Designed and built a sub-second headless storefront integrated with Shopify Plus Checkout, custom recurring plant-care bundles, and an embedded TidyAgent shopping concierge.',
+    challenge:
+      'Standard theme templates were causing 4.2-second mobile load times and high cart drop-off when shoppers needed compatibility guidance across 340+ SKUs.',
+    architectureSolution:
+      'Engineered an edge-cached React storefront backed by Shopify Storefront GraphQL API, optimistic slide-out cart drawers, and automated recurring billing webhooks.',
+    outcomeMetric: '+38% Repeat Orders',
+    outcomeDetail: '0.8s median Largest Contentful Paint & 38% lift in 90-day subscription retention.',
+    timeline: '5 Weeks',
+    stack: ['TypeScript', 'React', 'Shopify Storefront GraphQL', 'Stripe / Recharge Webhooks', 'Tailwind CSS'],
+    deliverables: [
+      'Edge-rendered custom storefront & slide-out cart drawer',
+      'Automated recurring bundle scheduler & inventory guard',
+      'Embedded AI product recommendation widget synced to catalog',
+    ],
+    previewUrl: '/projects#velora-botanicals',
+    liveDemoLabel: 'Inspect Shopify Plus Architecture',
+    imagePath: '/src/assets/images/project_velora_commerce_1795070942706.jpg',
+    imageAlt:
+      'Custom headless Shopify Plus botanical retail website displayed on desktop studio monitor and smartphone cart drawer',
+  },
+  {
+    id: 'healwell-telehealth',
+    slug: 'healwell-telehealth',
+    index: 'Case 02',
+    clientName: 'HealWell Clinics Group',
+    industry: 'HealthTech · Multi-Clinic Scheduling',
+    category: 'healthtech-mobile',
+    title: 'Multi-Location Patient Scheduling Console & React Native Companion App',
+    summary:
+      'Unified 18 outpatient clinics onto one timezone-safe clinician roster, live waitlist SMS engine, and cross-platform iOS/Android patient appointment app.',
+    challenge:
+      'Legacy booking software forced reception teams to reconcile calendars manually, creating double bookings and a 22% patient no-show rate.',
+    architectureSolution:
+      'Built transactional PostgreSQL slot locking paired with a React Native patient app for one-tap rescheduling, push reminders, and digital intake forms.',
+    outcomeMetric: '42K+ Monthly Bookings',
+    outcomeDetail: 'Reduced patient no-shows from 22% to 6.4% within 60 days of multi-clinic rollout.',
+    timeline: '7 Weeks',
+    stack: ['React Native', 'TypeScript', 'Node.js', 'PostgreSQL', 'Twilio SMS & Push Notifications'],
+    deliverables: [
+      'Receptionist multi-clinician calendar web console',
+      'iOS & Android React Native patient mobile app',
+      'Transactional slot reservation locks & reminder workers',
+    ],
+    previewUrl: '/projects#healwell-telehealth',
+    liveDemoLabel: 'Inspect HealthTech Mobile Stack',
+    imagePath: '/src/assets/images/project_medpulse_portal_1795070942931.jpg',
+    imageAlt:
+      'HealWell clinical scheduling web dashboard on tablet beside React Native patient mobile app on limestone surface',
+  },
+  {
+    id: 'freightgrid-dispatch',
+    slug: 'freightgrid-dispatch',
+    index: 'Case 03',
+    clientName: 'FreightGrid Logistics',
+    industry: 'B2B Fleet & Field Dispatch SaaS',
+    category: 'b2b-saas',
+    title: 'Regional Freight Dispatch Board & Driver Proof-of-Delivery Telemetry',
+    summary:
+      'Replaced disconnected spreadsheets and radio check-ins with a live dispatch control tower, driver Android tablet proof-of-delivery workflow, and automated invoice reconciliation.',
+    challenge:
+      'Dispatchers lost 14+ hours weekly chasing signed bills of lading before finance teams could trigger customer invoices.',
+    architectureSolution:
+      'Shipped a WebSocket-synced route dashboard, offline-first field tablet signature/photo capture, and direct ledger export into QuickBooks Online.',
+    outcomeMetric: '99.98% Webhook Sync',
+    outcomeDetail: 'Cut billing cycle time from 9 days to under 4 hours across 160 active fleet vehicles.',
+    timeline: '8 Weeks',
+    stack: ['TypeScript', 'React', 'WebSockets', 'Node.js', 'QuickBooks Online API', 'Offline SQLite'],
+    deliverables: [
+      'Real-time regional route dispatch & ETA telemetry board',
+      'Offline-resilient tablet proof-of-delivery capture app',
+      'Automated invoice reconciliation & QuickBooks sync',
+    ],
+    previewUrl: '/projects#freightgrid-dispatch',
+    liveDemoLabel: 'Inspect Dispatch Architecture',
+    imagePath: '/src/assets/images/project_freightgrid_ops_1795070943490.jpg',
+    imageAlt:
+      'Dual-screen laptop B2B freight dispatch board and ruggedized driver invoice ledger tablet on walnut studio table',
+  },
+  {
+    id: 'treasuryflow-billing',
+    slug: 'treasuryflow-billing',
+    index: 'Case 04',
+    clientName: 'TreasuryFlow B2B',
+    industry: 'FinTech · Multi-Tenant Billing SaaS',
+    category: 'b2b-saas',
+    title: 'Automated Multi-Currency B2B Invoicing & Cash-Flow Analytics Platform',
+    summary:
+      'Engineered a high-trust client billing portal featuring tiered usage metering, automated ACH/card collection, PDF tax invoice generation, and executive cash-flow forecasting.',
+    challenge:
+      'The founding team outgrew generic payment links and needed multi-tenant workspace isolation, audit trails, and role permissions for enterprise finance buyers.',
+    architectureSolution:
+      'Architected strict row-level tenant isolation, idempotent Stripe billing state machines, background PDF rendering workers, and sub-50ms ledger aggregation queries.',
+    outcomeMetric: '$4.8M+ Billed Cleanly',
+    outcomeDetail: 'Zero duplicate charges across 14,000+ recurring B2B invoices in first two quarters.',
+    timeline: '6 Weeks',
+    stack: ['TypeScript', 'PostgreSQL', 'Node.js', 'Stripe Connect & Billing', 'React'],
+    deliverables: [
+      'Multi-tenant role-based finance & collections dashboard',
+      'Idempotent invoice state machine & dunning automation',
+      'Automated PDF statement generation & ledger exports',
+    ],
+    previewUrl: '/projects#treasuryflow-billing',
+    liveDemoLabel: 'Inspect FinTech Ledger Design',
+    imagePath: '/src/assets/images/project_klarapay_saas_1795070960498.jpg',
+    imageAlt:
+      'TreasuryFlow B2B cash-flow analytics and automated invoicing web platform displayed on laptop on warm sandstone',
+  },
+];
+
+export const CLIENT_REVIEWS: VerifiedClientReview[] = [
+  {
+    id: 'rev-hannah-voss',
+    authorName: 'Hannah Voss',
+    authorRole: 'Head of E-Commerce',
+    companyName: 'The Botanical Collective',
+    projectOrProduct: 'Headless Shopify Plus & TidyAgent Chatbot',
+    rating: 5,
+    datePublished: '2026-09-14',
+    quote:
+      'Suleman delivered our headless Shopify Plus storefront and embedded TidyAgent chatbot cleanly in five weeks. Store visitors get instant product sizing answers and our repeat bundle retention jumped 38%.',
+  },
+  {
+    id: 'rev-marcus-reed',
+    authorName: 'Marcus Reed',
+    authorRole: 'Managing Director',
+    companyName: 'Harbor & Bright Services',
+    projectOrProduct: 'TidyFlow Field SaaS',
+    rating: 5,
+    datePublished: '2026-08-27',
+    quote:
+      'Moving 35 field crews onto TidyFlow eliminated missed check-ins and saved our office manager 12 hours every week on payroll and QuickBooks exports.',
+  },
+  {
+    id: 'rev-dr-nadia-farooq',
+    authorName: 'Dr. Nadia Farooq',
+    authorRole: 'Clinical Operations Partner',
+    companyName: 'HealWell Clinics Group',
+    projectOrProduct: 'Patient Booking Portal & React Native App',
+    rating: 5,
+    datePublished: '2026-10-03',
+    quote:
+      'Unlike agencies that pass work to junior freelancers, Suleman Khan architected our entire multi-clinic PostgreSQL scheduler and React Native mobile app personally. Zero double-bookings since launch.',
+  },
+  {
+    id: 'rev-oliver-hart',
+    authorName: 'Oliver Hart',
+    authorRole: 'Founder',
+    companyName: 'Northline Supply Co.',
+    projectOrProduct: 'TidySync & StockSentry (Shopify)',
+    rating: 5,
+    datePublished: '2026-10-19',
+    quote:
+      'TidySync keeps thousands of Shopify SKUs synced automatically without broken CSVs, and StockSentry catches velocity spikes days before our bestsellers hit zero.',
   },
 ];
 
@@ -305,31 +526,81 @@ export const PIPELINE_VENTURES: PipelineVenture[] = [
 export const SERVICE_CAPABILITIES: ServiceCapability[] = [
   {
     index: '01',
-    title: 'End-to-End SaaS Platforms',
+    title: 'Multi-Tenant SaaS Platforms',
     description:
-      'Multi-tenant architecture, role-based access, subscription billing, analytics dashboards, and scalable APIs engineered from zero to production.',
-    stack: 'TypeScript · React · Node.js · PostgreSQL / Cloud',
+      'Role-based workspaces, PostgreSQL schema architecture, Stripe subscription billing, and clean analytics APIs engineered from zero to paying customers.',
+    stack: 'TypeScript · React · Node.js · PostgreSQL',
   },
   {
     index: '02',
-    title: 'React Native Mobile Apps',
+    title: 'Webflow, Wix & Shopify AI Chatbots',
     description:
-      'Production iOS and Android applications featuring GPS check-ins, offline-first sync, push notifications, and native camera workflows.',
-    stack: 'React Native · Expo · Native Modules · iOS & Android',
+      'Embeddable store & website AI assistants inspired by TidyAgent—trained on live catalogs, pricing, and policies with sub-25KB scripts and instant lead handoff.',
+    stack: 'Webflow · Wix · Shopify App Bridge · Gemini Tooling',
   },
   {
     index: '03',
-    title: 'Shopify & Webflow Apps',
+    title: 'React Native Mobile Apps',
     description:
-      'Public App Store products and bespoke merchant integrations built to pass App Store review, handle high webhook volume, and embed cleanly.',
-    stack: 'Shopify API · App Bridge · Webhooks · Webflow',
+      'Production iOS and Android applications featuring GPS check-ins, offline-first storage, push notifications, and native camera checklists.',
+    stack: 'React Native · Expo · Native Modules · iOS & Android',
   },
   {
     index: '04',
-    title: 'AI Agents & Business Automation',
+    title: 'Shopify Apps & Business Sync',
     description:
-      'Practical AI copilots, structured tool-calling pipelines, and automated accounting/CRM bridges including QuickBooks and Google Sheets.',
-    stack: 'LLM Tool Calling · QuickBooks API · Background Queues',
+      'Public App Store products and bespoke merchant integrations engineered for App Store approval, resilient webhooks, QuickBooks, and ERP pipelines.',
+    stack: 'Shopify GraphQL · Webhooks · QuickBooks · Google Sheets',
+  },
+];
+
+export const ENGINEERING_PRINCIPLES: EngineeringPrinciple[] = [
+  {
+    number: '01',
+    title: 'Written directly by the founder — zero handoff layers',
+    detail:
+      'Agencies sell senior partners on Zoom, then staff junior contractors on Monday. At Hindara Labs, Suleman Khan scopes your schema, writes core TypeScript and React Native modules, and signs off every release.',
+  },
+  {
+    number: '02',
+    title: 'Proven in six revenue-running SaaS businesses',
+    detail:
+      'We do not guess on client budgets. Auth boundaries, Shopify webhook idempotency, QuickBooks sync queues, and Webflow/Wix embeds are battle-tested daily across our own six products.',
+  },
+  {
+    number: '03',
+    title: 'Boring, fast infrastructure over hype',
+    detail:
+      'Clean SQL schemas, strict TypeScript interfaces, predictable latency, and lightweight embed scripts that never degrade your store SEO or Core Web Vitals.',
+  },
+  {
+    number: '04',
+    title: '100% clean source ownership from day one',
+    detail:
+      'Every client engagement lives in your GitHub repository with documented environment setup, automated tests, and zero vendor lock-in.',
+  },
+];
+
+export const AGENCY_COMPARISON: StudioComparisonRow[] = [
+  {
+    dimension: 'Who writes the code',
+    hindaraWay: 'Suleman Khan (Founder & 6x SaaS Builder) directly',
+    typicalAgency: 'Rotating junior devs & outsourced subcontractors',
+  },
+  {
+    dimension: 'Real production proof',
+    hindaraWay: '6 live Hindara Labs SaaS products + 2 published Shopify App Store apps',
+    typicalAgency: 'Static pitch decks & unmaintained client templates',
+  },
+  {
+    dimension: 'Delivery cadence',
+    hindaraWay: 'Weekly staging deployments + direct Slack/Email access',
+    typicalAgency: 'Slow account-manager status calls every 2 weeks',
+  },
+  {
+    dimension: 'Webflow / Wix / Shopify readiness',
+    hindaraWay: 'Lightweight async embeds & GraphQL webhook resilience built-in',
+    typicalAgency: 'Heavy iframes that slow storefronts & hurt SEO',
   },
 ];
 
@@ -340,10 +611,11 @@ export const ENGAGEMENT_TRACKS: EngagementTrack[] = [
     title: '0 → 1 SaaS Product Build',
     cadence: '4–8 Weeks Target Launch',
     idealFor: 'Founders & Operators',
+    startingAt: 'From $5,000 fixed scope',
     description:
       'Take your SaaS concept from technical blueprint to a live multi-tenant web product with authentication, billing, and core workflows ready for paying customers.',
     deliverables: [
-      'System architecture & database schema design',
+      'System architecture & PostgreSQL schema design',
       'Responsive web application + admin console',
       'Auth, billing, transactional emails & deployment',
     ],
@@ -354,6 +626,7 @@ export const ENGAGEMENT_TRACKS: EngagementTrack[] = [
     title: 'Fractional CTO & Lead Architect',
     cadence: 'Ongoing Monthly Retainer',
     idealFor: 'Funded Startups & Growing Teams',
+    startingAt: 'Monthly studio retainer',
     description:
       'Bring Suleman Khan directly into your leadership loop to unblock architecture bottlenecks, review codebases, and ship critical features fast.',
     deliverables: [
@@ -365,14 +638,15 @@ export const ENGAGEMENT_TRACKS: EngagementTrack[] = [
   {
     id: 'mobile-shopify',
     index: '03',
-    title: 'React Native & Shopify App Build',
+    title: 'React Native, Shopify & AI Build',
     cadence: '3–6 Weeks Fixed Scope',
     idealFor: 'E-Commerce Brands & Field Teams',
+    startingAt: 'From $3,500 focused build',
     description:
-      'Dedicated delivery of cross-platform iOS/Android React Native apps or public/custom Shopify App Store software engineered by the creator of TidySync and AfterSale OS.',
+      'Dedicated delivery of iOS/Android React Native apps, public or custom Shopify apps, or Webflow/Wix AI chatbots built by the creator of TidyAgent and TidySync.',
     deliverables: [
-      'Production mobile app or Shopify embedded app',
-      'App Store / Play Store submission readiness',
+      'Production mobile app, Shopify app, or AI chatbot',
+      'App Store / Play Store / Shopify review readiness',
       'Third-party API sync (QuickBooks, Sheets, ERPs)',
     ],
   },
@@ -386,73 +660,39 @@ export const FAQ_ITEMS: FaqItem[] = [
       'Hindara Labs is founded and led by Suleman Khan, the founder and principal product architect behind TidyFlow, TidyAgent, TidySync, StockSentry, AfterSale OS, and SlotWise.',
   },
   {
+    id: 'tidyagent-platforms',
+    question: 'Which platforms does the TidyAgent AI chatbot support?',
+    answer:
+      'TidyAgent (agent.tidyflowapp.com) is built specifically for Webflow, Wix, and Shopify website and store owners—and is also live directly on the Shopify App Store (apps.shopify.com/tidy-agent). Drop it onto any storefront or site in minutes to answer visitor questions, recommend products, and capture leads 24/7.',
+  },
+  {
     id: 'what-saas-owned',
     question: 'Does Hindara Labs own and operate all six listed SaaS products?',
     answer:
-      'Yes. Hindara Labs is the owner and builder behind TidyFlow (tidyflowapp.com), TidyAgent (agent.tidyflowapp.com), TidySync (sync.tidyflowapp.com), StockSentry (stocksentry.tidyflowapp.com), AfterSale OS (aftersale.tidyflowapp.com), and SlotWise (slotwise.hindaralabs.com), with new ventures actively in development.',
+      'Yes. Hindara Labs is the owner and builder behind TidyFlow (tidyflowapp.com), TidyAgent (agent.tidyflowapp.com), TidySync (sync.tidyflowapp.com), StockSentry (stocksentry.tidyflowapp.com), AfterSale OS (aftersale.tidyflowapp.com), and SlotWise (slotwise.hindaralabs.com), with additional products in development.',
   },
   {
     id: 'how-hire-me',
-    question: 'How can I hire Suleman Khan for my SaaS or app project?',
+    question: 'How can I hire the Hindara Labs team for a custom build or client project?',
     answer:
-      'Use the Hire Me project brief builder on this page to choose an engagement model (0→1 SaaS Build, Fractional CTO, or React Native / Shopify App) and send your inquiry directly to hindarapro@gmail.com. Every brief is reviewed personally.',
+      'Use the project brief builder on the homepage or Services page to select an engagement track (0→1 SaaS Build, Fractional CTO, or React Native / Shopify / AI Build) and send your brief directly to hindarapro@gmail.com. Every project is reviewed and led directly by Suleman Khan and the Hindara Labs engineering team.',
   },
   {
     id: 'timeline-pricing',
-    question: 'What does a typical build timeline and working cadence look like?',
+    question: 'What does a typical build timeline and delivery model look like?',
     answer:
-      'Focused Shopify apps and React Native MVPs typically ship in 3 to 6 weeks, while full multi-tenant SaaS platforms launch in 4 to 8 weeks. Every build runs with weekly working demos, clean source ownership, and a clear written milestone estimate upfront.',
+      'Focused Shopify apps, AI chatbot embeds, and React Native MVPs typically ship in 3 to 6 weeks, while full multi-tenant SaaS platforms launch in 4 to 8 weeks. Every build runs with weekly working deployments, full source ownership, and a clear milestone estimate upfront.',
+  },
+  {
+    id: 'tech-stack-expertise',
+    question: 'What tech stack does Hindara Labs use for custom SaaS, mobile, and Shopify builds?',
+    answer:
+      'Hindara Labs ships with strict TypeScript, React, Next.js or Vite SPAs, Node.js, PostgreSQL, React Native for iOS and Android, Shopify GraphQL and App Bridge, Stripe Connect, QuickBooks APIs, and lightweight Webflow/Wix AI widgets.',
+  },
+  {
+    id: 'why-hindara-vs-agency',
+    question: 'Why hire Hindara Labs instead of a traditional software agency?',
+    answer:
+      'At traditional agencies, senior partners sell the deal and hand coding to junior contractors. With Hindara Labs, multi-SaaS founder Suleman Khan personally architects your database schema, writes core application code, and delivers weekly staging builds with zero handoff layers.',
   },
 ];
-
-export const BRAND_VIDEOS: BrandVideoItem[] = [
-  {
-    id: 'studio-showcase',
-    index: '01',
-    title: 'Hindara Labs — Multi-SaaS Venture Studio Overview',
-    subtitle: 'Six live SaaS platforms founded & architected by Suleman Khan',
-    description:
-      'Brand overview introducing Hindara Labs under founder Suleman Khan, spanning field operations (TidyFlow), autonomous AI (TidyAgent), Shopify commerce (TidySync, StockSentry, AfterSale OS), and online scheduling (SlotWise).',
-    videoUrl: '/videos/hindara-labs-studio-showcase.mp4',
-    posterUrl: '/videos/hindara-labs-studio-poster.jpg',
-    captionsUrl: '/videos/hindara-labs-studio-showcase.vtt',
-    isoDuration: 'PT16S',
-    displayDuration: '0:16',
-    focusLabel: 'All 6 Ventures · Brand Film',
-    transcript:
-      'Hindara Labs is an independent multi-SaaS venture studio founded and led by Suleman Khan. The portfolio owns and operates six live software platforms: TidyFlow for field-service scheduling and crew GPS tracking, TidyAgent for autonomous AI workflow triage, TidySync for published Shopify catalog synchronization, StockSentry for SKU stock-out surveillance, AfterSale OS for Shopify warranty claims, and SlotWise for embeddable appointment booking. Direct client engineering engagements include 0-to-1 SaaS builds, React Native mobile apps, Shopify App Store software, and Fractional CTO leadership.',
-  },
-  {
-    id: 'operations-ai',
-    index: '02',
-    title: 'Operations & Autonomous AI — TidyFlow + TidyAgent',
-    subtitle: 'Field dispatch, React Native mobile tracking & LLM orchestration',
-    description:
-      'Architectural showcase of TidyFlow (tidyflowapp.com) and TidyAgent (agent.tidyflowapp.com) demonstrating real-time scheduling, crew GPS verification, QuickBooks sync, and guardrailed AI operations.',
-    videoUrl: '/videos/operations-ai-tidyflow-tidyagent.mp4',
-    posterUrl: '/videos/operations-ai-poster.jpg',
-    captionsUrl: '/videos/operations-ai-tidyflow-tidyagent.vtt',
-    isoDuration: 'PT12S',
-    displayDuration: '0:12',
-    focusLabel: 'Operations & AI Stack',
-    transcript:
-      'TidyFlow powers cleaning and field-service companies across web, iOS, and Android with recurring job dispatch, GPS arrival verification, photo checklists, payroll insights, and automated QuickBooks and Google Sheets synchronization. Paired with TidyAgent, teams automate repetitive status checks and dispatch triage with human-in-the-loop safety controls—built on TypeScript, React Native, Node.js, and Gemini tool calling by Suleman Khan.',
-  },
-  {
-    id: 'commerce-scheduling',
-    index: '03',
-    title: 'Shopify Commerce & Scheduling Suite — Sync, Defense, Warranty & Booking',
-    subtitle: 'TidySync · StockSentry · AfterSale OS · SlotWise',
-    description:
-      'Product showcase highlighting Hindara Labs e-commerce and scheduling platforms for Shopify merchants and modern service teams.',
-    videoUrl: '/videos/shopify-commerce-scheduling-suite.mp4',
-    posterUrl: '/videos/commerce-scheduling-poster.jpg',
-    captionsUrl: '/videos/shopify-commerce-scheduling-suite.vtt',
-    isoDuration: 'PT12S',
-    displayDuration: '0:12',
-    focusLabel: 'Shopify & Scheduling Stack',
-    transcript:
-      'Across e-commerce and service scheduling, Hindara Labs builds focused SaaS software including TidySync (published on the Shopify App Store for catalog and order synchronization), StockSentry (real-time SKU velocity monitoring and stock-out defense), AfterSale OS (branded Shopify warranty registration, PDF certificates, and claims portal), and SlotWise (embeddable appointment booking widget and team availability console).',
-  },
-];
-

@@ -5,10 +5,10 @@
   --font-serif: "Playfair Display", Georgia, serif;
   --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --color-canvas: #fcfbff;
-  --color-surface: #f6f3ff;
-  --color-obsidian: #15102b;
-  --color-ink: #15102b;
+  --color-canvas: #faf9f6;
+  --color-surface: #f4f1ea;
+  --color-obsidian: #141418;
+  --color-ink: #111015;
   --color-accent: #5b21b6;
   --color-accent-bright: #7c3aed;
   --color-accent-hover: #4c1d95;
@@ -18,8 +18,8 @@
   html {
     scroll-behavior: smooth;
     font-family: var(--font-sans);
-    background-color: #fcfbff;
-    color: #15102b;
+    background-color: #faf9f6;
+    color: #111015;
     -webkit-font-smoothing: antialiased;
   }
 

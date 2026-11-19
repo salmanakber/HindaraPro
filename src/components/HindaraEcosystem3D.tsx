@@ -780,7 +780,7 @@ export function HindaraEcosystem3D({ onInspectVenture }: HindaraEcosystem3DProps
   return (
     <div
       data-testid="hindara-3d-stage"
-      className="relative h-[460px] w-full overflow-hidden rounded-3xl border border-[#2e2352] bg-[#15102b] shadow-2xl sm:h-[520px]"
+      className="relative h-[460px] w-full overflow-hidden rounded-2xl border border-[#2a2932] bg-[#141418] shadow-xl sm:h-[520px]"
     >
       {webglFailed ? (
         <div className="flex h-full flex-col items-center justify-center p-8 text-center text-[#f6f3ff]">

@@ -2,8 +2,8 @@ import { Fragment, type FormEvent, useEffect, useMemo, useRef, useState } from '
 import {
   ArrowRight,
   ArrowUpRight,
+  Briefcase,
   Check,
-  Film,
   Globe,
   Loader2,
   Maximize2,
@@ -15,7 +15,7 @@ import {
   Volume2,
   X,
 } from 'lucide-react';
-import { FOUNDER_PROFILE, type BrandVideoItem } from '../data/portfolio';
+import { FOUNDER_PROFILE, type ClientCaseStudy } from '../data/portfolio';
 import {
   ASSISTANT_LANGUAGES,
   getLocalizedStarterPrompts,
@@ -49,7 +49,7 @@ interface StudioChatbotProps {
   onJumpToHire: () => void;
   onApplyBriefDraft: (payload: ApplyBriefPayload) => void;
   onInspectVenture: (ventureId: string) => void;
-  onPlayBrandVideo: (videoId: BrandVideoItem['id']) => void;
+  onInspectClientProject: (project: ClientCaseStudy) => void;
 }
 
 const MODE_OPTIONS: Array<{ id: AssistantMode; label: string; hint: string }> = [
@@ -137,7 +137,7 @@ function renderFormattedText(text: string) {
         {lineIdx > 0 && <br />}
         {boldSegments.map((seg, sIdx) =>
           seg.startsWith('**') && seg.endsWith('**') ? (
-            <strong key={sIdx} className="font-semibold text-[#15102b]">
+            <strong key={sIdx} className="font-semibold text-[#111015]">
               {renderLinksAndEmails(seg.slice(2, -2))}
             </strong>
           ) : (
@@ -156,7 +156,7 @@ export function StudioChatbot({
   onJumpToHire,
   onApplyBriefDraft,
   onInspectVenture,
-  onPlayBrandVideo,
+  onInspectClientProject,
 }: StudioChatbotProps) {
   const [language, setLanguage] = useState<AssistantLanguageCode>('auto');
   const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage('auto')]);
@@ -533,15 +533,15 @@ export function StudioChatbot({
           key={actionKey}
           dir="ltr"
           data-testid="chat-tool-scope"
-          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b] shadow-xs"
+          className="mt-2.5 rounded-xl border border-[#e0dbd0] bg-white p-3 text-left text-xs text-[#111015] shadow-xs"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
             Scope Estimate · {action.recommendation.estimatedWeeks}
           </p>
-          <p className="mt-1 font-display text-sm font-bold text-[#15102b]">
+          <p className="mt-1 font-display text-sm font-bold text-[#111015]">
             {action.recommendation.trackTitle}
           </p>
-          <p className="mt-1 leading-relaxed text-[#4b4466]">
+          <p className="mt-1 leading-relaxed text-[#524e4a]">
             {action.recommendation.architectureFocus}
           </p>
           <button
@@ -563,7 +563,7 @@ export function StudioChatbot({
                 },
               });
             }}
-            className="mt-2.5 inline-flex min-h-[34px] items-center gap-1.5 rounded-xl bg-[#5b21b6] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#4c1d95]"
+            className="mt-2.5 inline-flex min-h-[34px] items-center gap-1.5 rounded-lg bg-[#5b21b6] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#4c1d95]"
           >
             {applied ? (
               <>
@@ -587,27 +587,27 @@ export function StudioChatbot({
           key={actionKey}
           dir="ltr"
           data-testid="chat-tool-ventures"
-          className="mt-2.5 space-y-2 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b]"
+          className="mt-2.5 space-y-2 rounded-xl border border-[#e0dbd0] bg-white p-3 text-left text-xs text-[#111015]"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
             Hindara Labs SaaS Match
           </p>
-          <p className="leading-relaxed text-[#4b4466]">{action.comparisonSummary}</p>
+          <p className="leading-relaxed text-[#524e4a]">{action.comparisonSummary}</p>
           <div className="space-y-1.5">
             {action.ventures.map((v) => (
               <div
                 key={v.id}
-                className="flex items-center justify-between gap-2 rounded-xl border border-[#ebe4fa] bg-[#f8f5ff] px-2.5 py-2"
+                className="flex items-center justify-between gap-2 rounded-lg border border-[#e6e2da] bg-[#faf9f6] px-2.5 py-2"
               >
                 <div className="min-w-0">
-                  <p className="font-display text-xs font-bold text-[#15102b]">{v.name}</p>
-                  <p className="truncate text-[11px] text-[#5e567a]">{v.platforms}</p>
+                  <p className="font-display text-xs font-bold text-[#111015]">{v.name}</p>
+                  <p className="truncate text-[11px] text-[#524e4a]">{v.platforms}</p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
                     onClick={() => onInspectVenture(v.id)}
-                    className="rounded-lg border border-[#d6c9f2] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#15102b] hover:border-[#5b21b6]"
+                    className="rounded-md border border-[#d6d0c4] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#111015] hover:border-[#5b21b6]"
                   >
                     Inspect
                   </button>
@@ -616,7 +616,7 @@ export function StudioChatbot({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Open ${v.name}`}
-                    className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-[#15102b] text-white hover:bg-[#5b21b6]"
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-[#111015] text-white hover:bg-[#5b21b6]"
                   >
                     <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
                   </a>
@@ -638,14 +638,14 @@ export function StudioChatbot({
           key={actionKey}
           dir="ltr"
           data-testid="chat-tool-brief"
-          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b]"
+          className="mt-2.5 rounded-xl border border-[#e0dbd0] bg-white p-3 text-left text-xs text-[#111015]"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
             Hire Brief Draft
           </p>
-          <p className="mt-1 leading-relaxed text-[#4b4466]">{action.summaryNote}</p>
+          <p className="mt-1 leading-relaxed text-[#524e4a]">{action.summaryNote}</p>
           {action.draft.projectGoals && (
-            <p className="mt-2 rounded-xl border border-[#ebe4fa] bg-[#f8f5ff] p-2 text-[11px] text-[#3b3454]">
+            <p className="mt-2 rounded-lg border border-[#e6e2da] bg-[#faf9f6] p-2 text-[11px] text-[#2d2a27]">
               {action.draft.projectGoals}
             </p>
           )}
@@ -657,7 +657,7 @@ export function StudioChatbot({
                 markApplied(actionKey);
                 onApplyBriefDraft({ draft: action.draft });
               }}
-              className="inline-flex min-h-[34px] items-center gap-1.5 rounded-xl bg-[#15102b] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#5b21b6]"
+              className="inline-flex min-h-[34px] items-center gap-1.5 rounded-lg bg-[#111015] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#5b21b6]"
             >
               {applied ? (
                 <>
@@ -677,7 +677,7 @@ export function StudioChatbot({
                 type="button"
                 disabled={sendingNow}
                 onClick={() => void handleSendBriefDirect(actionKey, action.draft)}
-                className="inline-flex min-h-[34px] items-center gap-1.5 rounded-xl bg-[#5b21b6] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#4c1d95] disabled:opacity-60"
+                className="inline-flex min-h-[34px] items-center gap-1.5 rounded-lg bg-[#5b21b6] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 transition-colors hover:bg-[#4c1d95] disabled:opacity-60"
               >
                 {sendingNow && <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />}
                 Send Brief Now
@@ -694,30 +694,30 @@ export function StudioChatbot({
       );
     }
 
-    if (action.type === 'brand_video_focus') {
+    if (action.type === 'client_case_focus') {
       return (
         <div
           key={actionKey}
           dir="ltr"
-          data-testid="chat-tool-video"
-          className="mt-2.5 rounded-2xl border border-[#d6c9f2] bg-white p-3 text-left text-xs text-[#15102b]"
+          data-testid="chat-tool-case"
+          className="mt-2.5 rounded-xl border border-[#e0dbd0] bg-white p-3 text-left text-xs text-[#111015]"
         >
           <p className="font-mono text-[10px] font-semibold tracking-wider text-[#5b21b6] uppercase">
-            Studio Film · {action.video.displayDuration}
+            Case Study · {action.project.outcomeMetric}
           </p>
-          <p className="mt-1 font-display text-xs font-bold text-[#15102b]">
-            {action.video.title}
+          <p className="mt-1 font-display text-xs font-bold text-[#111015]">
+            {action.project.clientName} — {action.project.title}
           </p>
           <button
             type="button"
             onClick={() => {
-              onPlayBrandVideo(action.video.id);
+              onInspectClientProject(action.project);
               onOpenChange(false);
             }}
-            className="mt-2.5 inline-flex min-h-[34px] items-center gap-1.5 rounded-xl bg-[#5b21b6] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 hover:bg-[#4c1d95]"
+            className="mt-2.5 inline-flex min-h-[34px] items-center gap-1.5 rounded-lg bg-[#111015] px-3 py-1.5 text-[11px] font-semibold text-white whitespace-nowrap shrink-0 hover:bg-[#5b21b6]"
           >
-            <Film className="h-3.5 w-3.5" aria-hidden="true" />
-            Watch Studio Film
+            <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
+            Inspect Case Study
           </button>
         </div>
       );
@@ -735,7 +735,7 @@ export function StudioChatbot({
           onClick={() => onOpenChange(true)}
           aria-expanded={false}
           aria-controls="hindara-studio-chatbot"
-          className="inline-flex min-h-[46px] items-center gap-2.5 rounded-2xl border border-[#2e2352] bg-[#15102b] px-4 py-2.5 text-sm font-semibold text-white shadow-xl whitespace-nowrap shrink-0 transition-all hover:bg-[#5b21b6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b21b6]"
+          className="inline-flex min-h-[46px] items-center gap-2.5 rounded-2xl border border-[#2a2932] bg-[#141418] px-4 py-2.5 text-sm font-semibold text-white shadow-xl whitespace-nowrap shrink-0 transition-all hover:bg-[#5b21b6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b21b6]"
         >
           <MessageSquare className="h-4 w-4 text-violet-300" aria-hidden="true" />
           <span>Ask Hindara AI</span>
@@ -746,20 +746,20 @@ export function StudioChatbot({
           role="dialog"
           aria-label="Hindara Labs Studio AI Assistant"
           data-testid="chatbot-panel"
-          className={`flex flex-col overflow-hidden rounded-3xl border border-[#d9d0f0] bg-[#fcfbff] shadow-2xl transition-all duration-150 ${
+          className={`flex flex-col overflow-hidden rounded-2xl border border-[#dcd7cc] bg-[#faf9f6] shadow-2xl transition-all duration-150 ${
             expanded
               ? 'h-[min(680px,calc(100vh-2rem))] w-[min(540px,calc(100vw-2rem))]'
               : 'h-[min(590px,calc(100vh-2rem))] w-[min(410px,calc(100vw-2rem))]'
           }`}
         >
           {/* Header + Language Bar + Mode Switcher */}
-          <div className="border-b border-[#2e2352] bg-[#15102b] px-4 pt-3.5 pb-3 text-white">
+          <div className="border-b border-[#2a2932] bg-[#141418] px-4 pt-3.5 pb-3 text-white">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <p className="font-display text-sm font-bold tracking-tight">
                   Hindara Studio Assistant
                 </p>
-                <p className="truncate text-[11px] text-violet-200/80">
+                <p className="truncate text-[11px] text-neutral-300">
                   Multilingual AI · Scope, Live SaaS &amp; Voice
                 </p>
               </div>
@@ -769,7 +769,7 @@ export function StudioChatbot({
                   data-testid="chatbot-expand-toggle"
                   onClick={() => setExpanded((prev) => !prev)}
                   aria-label={expanded ? 'Compact assistant window' : 'Expand assistant window'}
-                  className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-violet-200 transition-colors hover:bg-white/10 hover:text-white"
+                  className="hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   {expanded ? (
                     <Minimize2 className="h-4 w-4" aria-hidden="true" />
@@ -781,7 +781,7 @@ export function StudioChatbot({
                   type="button"
                   onClick={handleReset}
                   aria-label="Reset conversation"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-violet-200 transition-colors hover:bg-white/10 hover:text-white"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <RotateCcw className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -789,7 +789,7 @@ export function StudioChatbot({
                   type="button"
                   onClick={() => onOpenChange(false)}
                   aria-label="Close studio assistant"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-violet-200 transition-colors hover:bg-white/10 hover:text-white"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -801,7 +801,7 @@ export function StudioChatbot({
               <div
                 role="group"
                 aria-label="Assistant specialization mode"
-                className="grid flex-1 grid-cols-3 gap-1 rounded-xl bg-[#0e0a1e] p-1"
+                className="grid flex-1 grid-cols-3 gap-1 rounded-xl bg-[#0e0e12] p-1"
               >
                 {MODE_OPTIONS.map((opt) => {
                   const active = mode === opt.id;
@@ -816,7 +816,7 @@ export function StudioChatbot({
                       className={`min-h-[28px] rounded-lg px-1.5 py-1 text-[11px] font-semibold whitespace-nowrap transition-colors ${
                         active
                           ? 'bg-[#5b21b6] text-white shadow-xs'
-                          : 'text-violet-200/80 hover:text-white'
+                          : 'text-neutral-300 hover:text-white'
                       }`}
                     >
                       {opt.label}
@@ -840,10 +840,10 @@ export function StudioChatbot({
                   onChange={(e) =>
                     handleLanguageChange(e.target.value as AssistantLanguageCode)
                   }
-                  className="min-h-[34px] max-w-[116px] cursor-pointer rounded-xl border border-[#2e2352] bg-[#0e0a1e] pr-2 pl-7 text-[11px] font-semibold text-violet-100 focus:border-violet-400 focus:outline-none"
+                  className="min-h-[34px] max-w-[116px] cursor-pointer rounded-xl border border-[#2f2e38] bg-[#0e0e12] pr-2 pl-7 text-[11px] font-semibold text-neutral-100 focus:border-violet-400 focus:outline-none"
                 >
                   {ASSISTANT_LANGUAGES.map((lang) => (
-                    <option key={lang.code} value={lang.code} className="bg-[#15102b] text-white">
+                    <option key={lang.code} value={lang.code} className="bg-[#141418] text-white">
                       {lang.code === 'auto' ? 'Auto' : lang.nativeLabel}
                     </option>
                   ))}
@@ -880,8 +880,8 @@ export function StudioChatbot({
                         rtlBubble ? 'text-right' : 'text-left'
                       } ${
                         msg.role === 'user'
-                          ? 'bg-[#5b21b6] text-white'
-                          : 'border border-[#e3dcf5] bg-[#f6f3ff] text-[#15102b]'
+                          ? 'bg-[#111015] text-white'
+                          : 'border border-[#e0dbd0] bg-white text-[#111015]'
                       }`}
                     >
                       {msg.content.trim().length > 0 && (
@@ -900,14 +900,14 @@ export function StudioChatbot({
                       {canListen && (
                         <div
                           dir="ltr"
-                          className="mt-2 flex items-center justify-end border-t border-[#e8e2f6] pt-1.5"
+                          className="mt-2 flex items-center justify-end border-t border-[#efece5] pt-1.5"
                         >
                           <button
                             type="button"
                             data-testid={`chat-listen-${msg.id}`}
                             onClick={() => void handleToggleVoice(msg)}
                             disabled={isSynthesizingThis}
-                            className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-[#5b21b6] transition-colors hover:bg-[#ebe4fa] disabled:opacity-60"
+                            className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-[#5b21b6] transition-colors hover:bg-[#f4f1ea] disabled:opacity-60"
                           >
                             {isSynthesizingThis ? (
                               <>
@@ -935,7 +935,7 @@ export function StudioChatbot({
 
             {messages.length === 1 && !isLoading && (
               <div className="space-y-1.5 pt-1">
-                <p className="text-[11px] font-semibold tracking-wider text-[#5e567a] uppercase">
+                <p className="text-[11px] font-semibold tracking-wider text-[#524e4a] uppercase">
                   {selectedLanguageObj.englishName} · Suggested Prompts
                 </p>
                 <div className="flex flex-col gap-1.5">
@@ -947,7 +947,7 @@ export function StudioChatbot({
                         type="button"
                         dir={rtlPrompt ? 'rtl' : 'ltr'}
                         onClick={() => void sendMessage(prompt)}
-                        className={`rounded-xl border border-[#dcd4f0] bg-white px-3 py-2 text-xs font-medium text-[#15102b] transition-colors hover:border-[#7c3aed] hover:bg-[#f6f3ff] ${
+                        className={`rounded-xl border border-[#e0dbd0] bg-white px-3 py-2 text-xs font-medium text-[#111015] transition-colors hover:border-[#5b21b6] ${
                           rtlPrompt ? 'text-right' : 'text-left'
                         }`}
                       >
@@ -966,7 +966,7 @@ export function StudioChatbot({
                 messages[messages.length - 1]?.toolActions?.length === 0)) ||
               messages[messages.length - 1]?.role === 'user') ? (
               <div className="flex justify-start">
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-[#e3dcf5] bg-[#f6f3ff] px-3.5 py-2.5 text-xs font-medium text-[#524b6b]">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-[#e0dbd0] bg-white px-3.5 py-2.5 text-xs font-medium text-[#524e4a]">
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-[#5b21b6]" aria-hidden="true" />
                   Thinking &amp; running studio tools...
                 </div>
@@ -985,7 +985,7 @@ export function StudioChatbot({
           </div>
 
           {/* Input + Direct Hire Link */}
-          <div className="border-t border-[#e8e2f6] bg-white p-3">
+          <div className="border-t border-[#e6e2da] bg-white p-3">
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
               <label htmlFor="studio-chat-input" className="sr-only">
                 Ask Hindara Labs AI Assistant
@@ -999,18 +999,18 @@ export function StudioChatbot({
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={selectedLanguageObj.inputPlaceholder}
                 disabled={isLoading}
-                className="min-h-[40px] flex-1 rounded-xl border border-[#dcd4f0] bg-[#fcfbff] px-3 text-sm text-[#15102b] placeholder:text-[#8b83a8] focus:border-[#5b21b6] focus:outline-none disabled:opacity-60"
+                className="min-h-[40px] flex-1 rounded-xl border border-[#d6d0c4] bg-[#faf9f6] px-3 text-sm text-[#111015] placeholder:text-[#868078] focus:border-[#5b21b6] focus:outline-none disabled:opacity-60"
               />
               <button
                 type="submit"
                 disabled={isLoading || !inputValue.trim()}
                 aria-label="Send message"
-                className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl bg-[#5b21b6] text-white transition-colors hover:bg-[#4c1d95] disabled:opacity-50"
+                className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl bg-[#111015] text-white transition-colors hover:bg-[#5b21b6] disabled:opacity-50"
               >
                 <Send className="h-4 w-4" aria-hidden="true" />
               </button>
             </form>
-            <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-[#5e567a]">
+            <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-[#524e4a]">
               <span>Direct channel · {FOUNDER_PROFILE.primaryName}</span>
               <button
                 type="button"

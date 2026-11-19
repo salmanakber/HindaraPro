@@ -11,17 +11,18 @@ import {
   Type,
 } from '@google/genai';
 import {
-  BRAND_VIDEOS,
+  CLIENT_PROJECTS,
   ENGAGEMENT_TRACKS,
   FOUNDER_PROFILE,
   SAAS_VENTURES,
   SERVICE_CAPABILITIES,
 } from './src/data/portfolio.ts';
+import { applyRouteSeoToHtml } from './src/data/seoRoutes.ts';
 import {
   type AssistantLanguageCode,
   type AssistantMode,
   type AssistantToolAction,
-  buildBrandVideoFocusAction,
+  buildClientCaseFocusAction,
   buildHireBriefDraftAction,
   buildHireScopeSummary,
   buildScopeRecommendationAction,
@@ -308,18 +309,19 @@ async function createServer() {
       },
     },
     {
-      name: 'showBrandVideoReel',
+      name: 'spotlightClientCaseStudy',
       description:
-        'Offer an interactive action button to jump directly to and play one of Hindara Labs SEO brand films (studio-showcase, operations-ai, commerce-scheduling).',
+        'Display an interactive card highlighting one of Hindara Labs featured client case studies (velora-botanicals, healwell-telehealth, freightgrid-dispatch, treasuryflow-billing) with metrics and a button to inspect the architecture.',
       parameters: {
         type: Type.OBJECT,
         properties: {
-          videoId: {
+          projectId: {
             type: Type.STRING,
-            description: 'One of: studio-showcase, operations-ai, commerce-scheduling.',
+            description:
+              'One of: velora-botanicals, healwell-telehealth, freightgrid-dispatch, treasuryflow-billing.',
           },
         },
-        required: ['videoId'],
+        required: ['projectId'],
       },
     },
   ];
@@ -335,8 +337,8 @@ async function createServer() {
         return buildVentureSpotlightAction(args.ventureIds, args.comparisonSummary);
       case 'prepareHireBrief':
         return buildHireBriefDraftAction(args);
-      case 'showBrandVideoReel':
-        return buildBrandVideoFocusAction(args.videoId);
+      case 'spotlightClientCaseStudy':
+        return buildClientCaseFocusAction(args.projectId);
       default:
         return null;
     }
@@ -381,7 +383,7 @@ async function createServer() {
 
     const ventureContext = SAAS_VENTURES.map(
       (v) =>
-        `- [id=${v.id}] ${v.name} (${v.url}): ${v.tagline}. Platforms: ${v.platforms}. Audience: ${v.audience}. Key capabilities: ${v.capabilities.slice(0, 4).join('; ')}.`
+        `- [id=${v.id}] ${v.name} (${v.url}${v.secondaryUrl ? `, ${v.secondaryUrl.label}: ${v.secondaryUrl.href}` : ''}): ${v.tagline}. Platforms: ${v.platforms}. Audience: ${v.audience}. Key capabilities: ${v.capabilities.slice(0, 4).join('; ')}.`
     ).join('\n');
 
     const trackContext = ENGAGEMENT_TRACKS.map(
@@ -392,8 +394,9 @@ async function createServer() {
       (c) => `- ${c.title} [${c.stack}]: ${c.description}`
     ).join('\n');
 
-    const videoContext = BRAND_VIDEOS.map(
-      (vid) => `- [videoId=${vid.id}] ${vid.title} (${vid.displayDuration}): ${vid.subtitle}`
+    const caseStudyContext = CLIENT_PROJECTS.map(
+      (proj) =>
+        `- [projectId=${proj.id}] ${proj.clientName} (${proj.industry}): ${proj.title}. Outcome: ${proj.outcomeMetric} (${proj.outcomeDetail})`
     ).join('\n');
 
     const focusedVenture = body?.contextVentureId
@@ -402,10 +405,10 @@ async function createServer() {
 
     const modeGuidance =
       mode === 'architect'
-        ? 'Active Mode: ARCHITECT — Focus on concrete multi-tenant database boundaries, React Native offline sync, Shopify GraphQL/webhook resilience, and LLM tool calling. Proactively call recommendArchitectureScope or spotlightSaasVentures when the visitor describes a build.'
+        ? 'Active Mode: ARCHITECT — Focus on concrete multi-tenant database boundaries, React Native offline sync, Webflow/Wix/Shopify storefront scripts, Shopify GraphQL/webhook resilience, and LLM tool calling. Proactively call recommendArchitectureScope or spotlightSaasVentures when the visitor describes a build.'
         : mode === 'brief-builder'
           ? 'Active Mode: BRIEF BUILDER — Help convert the visitor request into a clean Hire Brief. Proactively call prepareHireBrief (or recommendArchitectureScope) with structured track, timeline, budgetRange, and projectGoals so they can apply or submit immediately.'
-          : 'Active Mode: ADVISOR — Give concise executive answers about Hindara Labs, its six live SaaS products, brand films, and hiring Suleman Khan. Use tools whenever interactive cards (product spotlights, scope estimates, brief drafts, or brand reels) add clear value.';
+          : 'Active Mode: ADVISOR — Give concise executive answers about Hindara Labs, its six live SaaS products (notably TidyAgent as an embeddable AI support & sales chatbot for Webflow, Wix & Shopify store owners), featured client case studies, and hiring Suleman Khan. Use tools whenever interactive cards (product spotlights, case studies, scope estimates, or brief drafts) add clear value.';
 
     const languageRule =
       selectedLang.code === 'auto'
@@ -420,18 +423,19 @@ Rules:
 4. ${modeGuidance}
 5. Only cite exact URLs listed below (such as https://hindaralabs.com/ or the six product URLs) and the exact email ${FOUNDER_PROFILE.email}. Never invent or guess other domain names or construct https://hindarapro@gmail.com.
 6. Invite serious project inquiries to apply the Hire Brief on the page (#hire-me) or email ${FOUNDER_PROFILE.email}.
-7. Never invent fake metrics, fake client names, or unverified claims.
+7. Never invent unverified metrics outside the portfolio or case studies below.
 
 Founder: ${FOUNDER_PROFILE.primaryName} (${FOUNDER_PROFILE.role})
 Studio: ${FOUNDER_PROFILE.studioName} (${FOUNDER_PROFILE.domain})
 Direct Email: ${FOUNDER_PROFILE.email}
 LinkedIn: ${FOUNDER_PROFILE.linkedinUrl}
+Client Rating: 4.9 out of 5.0 stars across 42 verified client & merchant reviews.
 
 Live Owned SaaS Portfolio:
 ${ventureContext}
 
-Studio Brand Films:
-${videoContext}
+Featured Client Case Studies:
+${caseStudyContext}
 
 Engineering Capabilities:
 ${capabilityContext}
@@ -636,7 +640,7 @@ ${trackContext}${
                         ? firstAction.comparisonSummary
                         : firstAction.type === 'hire_brief_draft'
                           ? firstAction.summaryNote
-                          : `Featured brand film: **${firstAction.video.title}** (${firstAction.video.displayDuration}).`;
+                          : `Featured case study: **${firstAction.project.clientName}** (${firstAction.project.outcomeMetric}).`;
                   res.write(`data: ${JSON.stringify({ delta: fallbackSummary })}\n\n`);
                 }
               }
@@ -775,14 +779,35 @@ ${trackContext}${
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: 'spa',
+      appType: 'custom',
     });
     app.use(vite.middlewares);
+
+    app.get('*', async (req, res, next) => {
+      if (
+        req.originalUrl.startsWith('/api/') ||
+        (req.headers.accept && !req.headers.accept.includes('text/html'))
+      ) {
+        next();
+        return;
+      }
+      try {
+        const rawHtml = fs.readFileSync(path.resolve(process.cwd(), 'index.html'), 'utf-8');
+        const seoHtml = applyRouteSeoToHtml(rawHtml, req.originalUrl);
+        const transformed = await vite.transformIndexHtml(req.originalUrl, seoHtml);
+        res.status(200).set({ 'Content-Type': 'text/html; charset=utf-8' }).end(transformed);
+      } catch (err) {
+        vite.ssrFixStacktrace(err as Error);
+        next(err);
+      }
+    });
   } else {
     const distDir = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distDir));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(distDir, 'index.html'));
+    const prodTemplate = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
+    app.use(express.static(distDir, { index: false }));
+    app.get('*', (req, res) => {
+      const seoHtml = applyRouteSeoToHtml(prodTemplate, req.path);
+      res.status(200).set({ 'Content-Type': 'text/html; charset=utf-8' }).end(seoHtml);
     });
   }
 

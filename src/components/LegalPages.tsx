@@ -7,7 +7,7 @@ interface LegalPageProps {
 
 export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
   return (
-    <article className="bg-[#fcfbff] py-14 sm:py-20">
+    <article className="bg-[#faf9f6] py-14 sm:py-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <a
           href="/"
@@ -21,22 +21,22 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
           Back to Hindara Labs
         </a>
 
-        <header className="mt-6 border-b border-[#e8e2f6] pb-8">
-          <p className="text-xs font-semibold tracking-wider text-[#5b21b6] uppercase sm:text-sm">
+        <header className="mt-6 border-b border-[#e6e2da] pb-8">
+          <p className="font-mono text-xs font-medium tracking-widest text-[#524e4a] uppercase">
             Legal &amp; Compliance · Hindara Labs
           </p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#15102b] sm:text-4xl">
-            Privacy <span className="font-editorial text-[#6d28d9]">Policy</span>
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#111015] sm:text-4xl">
+            Privacy <span className="font-editorial text-[#5b21b6]">Policy</span>
           </h1>
-          <p className="mt-3 text-sm text-[#5e567a]">
+          <p className="mt-3 text-sm text-[#524e4a]">
             Effective Date: November 18, 2026 · Controller: {FOUNDER_PROFILE.studioName} (
             {FOUNDER_PROFILE.primaryName})
           </p>
         </header>
 
-        <div className="mt-8 space-y-8 text-base leading-relaxed text-[#3b3454]">
-          <section className="rounded-3xl border border-[#e3dcf5] bg-[#f6f3ff] p-6 sm:p-8">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+        <div className="mt-8 space-y-8 text-base leading-relaxed text-[#2d2a27]">
+          <section className="rounded-2xl border border-[#e0dbd0] bg-white p-6 sm:p-8">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               1. Scope &amp; Data Controller
             </h2>
             <p className="mt-3">
@@ -50,7 +50,7 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               2. Information You Provide
             </h2>
             <p>
@@ -72,7 +72,7 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               3. How We Use Inquiry Information
             </h2>
             <p>
@@ -85,7 +85,7 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               4. Cookies, Analytics &amp; Third-Party Links
             </h2>
             <p>
@@ -97,7 +97,7 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               5. Data Retention &amp; Your Rights
             </h2>
             <p>
@@ -114,17 +114,17 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
             </p>
           </section>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#e3dcf5] bg-[#15102b] p-6 text-white sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#2a2932] bg-[#141418] p-6 text-white sm:p-8">
             <div>
               <h2 className="font-display text-lg font-bold">Privacy Questions?</h2>
-              <p className="mt-1 text-sm text-violet-200/80">
+              <p className="mt-1 text-sm text-neutral-300">
                 Contact {FOUNDER_PROFILE.primaryName} directly regarding privacy or data requests.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <a
                 href={`mailto:${FOUNDER_PROFILE.email}`}
-                className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-[#7c3aed] px-5 py-2 text-sm font-semibold text-white hover:bg-[#6d28d9]"
+                className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-[#5b21b6] px-5 py-2 text-sm font-semibold text-white hover:bg-[#4c1d95]"
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
                 {FOUNDER_PROFILE.email}
@@ -135,7 +135,7 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
                   e.preventDefault();
                   onNavigate('/terms');
                 }}
-                className="inline-flex min-h-[42px] items-center rounded-xl border border-violet-400/40 px-4 py-2 text-sm font-semibold text-violet-100 hover:bg-white/10"
+                className="inline-flex min-h-[42px] items-center rounded-xl border border-neutral-600 px-4 py-2 text-sm font-semibold text-neutral-200 hover:bg-white/10"
               >
                 Read Terms of Service →
               </a>
@@ -149,7 +149,7 @@ export function PrivacyPolicyPage({ onNavigate }: LegalPageProps) {
 
 export function TermsOfServicePage({ onNavigate }: LegalPageProps) {
   return (
-    <article className="bg-[#fcfbff] py-14 sm:py-20">
+    <article className="bg-[#faf9f6] py-14 sm:py-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <a
           href="/"
@@ -163,22 +163,22 @@ export function TermsOfServicePage({ onNavigate }: LegalPageProps) {
           Back to Hindara Labs
         </a>
 
-        <header className="mt-6 border-b border-[#e8e2f6] pb-8">
-          <p className="text-xs font-semibold tracking-wider text-[#5b21b6] uppercase sm:text-sm">
+        <header className="mt-6 border-b border-[#e6e2da] pb-8">
+          <p className="font-mono text-xs font-medium tracking-widest text-[#524e4a] uppercase">
             Legal &amp; Governance · Hindara Labs
           </p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#15102b] sm:text-4xl">
-            Terms of <span className="font-editorial text-[#6d28d9]">Service</span>
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#111015] sm:text-4xl">
+            Terms of <span className="font-editorial text-[#5b21b6]">Service</span>
           </h1>
-          <p className="mt-3 text-sm text-[#5e567a]">
+          <p className="mt-3 text-sm text-[#524e4a]">
             Effective Date: November 18, 2026 · Operated by {FOUNDER_PROFILE.studioName} (
             {FOUNDER_PROFILE.primaryName})
           </p>
         </header>
 
-        <div className="mt-8 space-y-8 text-base leading-relaxed text-[#3b3454]">
-          <section className="rounded-3xl border border-[#e3dcf5] bg-[#f6f3ff] p-6 sm:p-8">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+        <div className="mt-8 space-y-8 text-base leading-relaxed text-[#2d2a27]">
+          <section className="rounded-2xl border border-[#e0dbd0] bg-white p-6 sm:p-8">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               1. Acceptance of Terms
             </h2>
             <p className="mt-3">
@@ -189,7 +189,7 @@ export function TermsOfServicePage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               2. Intellectual Property &amp; Software Ownership
             </h2>
             <p>
@@ -204,7 +204,7 @@ export function TermsOfServicePage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               3. Client Engagements &amp; Project Briefs
             </h2>
             <p>
@@ -217,7 +217,7 @@ export function TermsOfServicePage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               4. External Product Platforms
             </h2>
             <p>
@@ -228,28 +228,28 @@ export function TermsOfServicePage({ onNavigate }: LegalPageProps) {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-display text-xl font-bold text-[#15102b]">
+            <h2 className="font-display text-xl font-bold text-[#111015]">
               5. Disclaimer &amp; Limitation of Liability
             </h2>
             <p>
-              This studio website is provided on an "as is" and "as available" basis for
-              informational and inquiry purposes. To the fullest extent permitted by law,
+              This studio website is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo;
+              basis for informational and inquiry purposes. To the fullest extent permitted by law,
               Hindara Labs and {FOUNDER_PROFILE.primaryName} disclaim liability for any
               indirect or incidental damages arising from use of this informational site.
             </p>
           </section>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[#e3dcf5] bg-[#15102b] p-6 text-white sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#2a2932] bg-[#141418] p-6 text-white sm:p-8">
             <div>
               <h2 className="font-display text-lg font-bold">Need Clarification?</h2>
-              <p className="mt-1 text-sm text-violet-200/80">
+              <p className="mt-1 text-sm text-neutral-300">
                 Reach out directly regarding commercial terms or custom build agreements.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <a
                 href={`mailto:${FOUNDER_PROFILE.email}`}
-                className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-[#7c3aed] px-5 py-2 text-sm font-semibold text-white hover:bg-[#6d28d9]"
+                className="inline-flex min-h-[42px] items-center gap-2 rounded-xl bg-[#5b21b6] px-5 py-2 text-sm font-semibold text-white hover:bg-[#4c1d95]"
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
                 {FOUNDER_PROFILE.email}
@@ -260,7 +260,7 @@ export function TermsOfServicePage({ onNavigate }: LegalPageProps) {
                   e.preventDefault();
                   onNavigate('/privacy');
                 }}
-                className="inline-flex min-h-[42px] items-center rounded-xl border border-violet-400/40 px-4 py-2 text-sm font-semibold text-violet-100 hover:bg-white/10"
+                className="inline-flex min-h-[42px] items-center rounded-xl border border-neutral-600 px-4 py-2 text-sm font-semibold text-neutral-200 hover:bg-white/10"
               >
                 Read Privacy Policy →
               </a>

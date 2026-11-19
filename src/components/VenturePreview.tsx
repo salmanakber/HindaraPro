@@ -40,23 +40,23 @@ export function VenturePreview({ variant }: VenturePreviewProps) {
       return (
         <div
           aria-hidden="true"
-          className="rounded-2xl border border-[#e3dcf5] bg-[#f6f3ff] p-4 text-xs"
+          className="rounded-xl border border-[#e6e2da] bg-[#faf9f6] p-4 text-xs"
         >
-          <div className="flex items-center justify-between border-b border-[#e3dcf5] pb-2 font-mono text-[11px] text-[#5e567a]">
-            <span>Agent Operations Queue</span>
-            <span className="tabular-nums text-[#5b21b6]">Guardrailed Execution</span>
+          <div className="flex items-center justify-between border-b border-[#e6e2da] pb-2 font-mono text-[11px] text-[#524e4a]">
+            <span>Webflow · Wix · Shopify Embed</span>
+            <span className="tabular-nums text-[#5b21b6]">Store AI Active</span>
           </div>
           <div className="mt-3 space-y-2">
-            <div className="rounded-xl border border-[#e8e2f6] bg-white px-3 py-2.5">
-              <p className="font-medium text-[#15102b]">Reschedule Request #418</p>
-              <p className="mt-0.5 text-[11px] text-[#5e567a]">
-                Verified crew capacity for Thu 14:00 · Drafted client confirmation
+            <div className="rounded-lg border border-[#e6e2da] bg-white px-3 py-2.5">
+              <p className="font-medium text-[#111015]">Visitor: &ldquo;Does the ceramic diffuser ship to Canada?&rdquo;</p>
+              <p className="mt-1 text-[11px] text-[#524e4a]">
+                TidyAgent: Synced live Shopify shipping policy + recommended Filter Pack ($24)
               </p>
             </div>
-            <div className="rounded-xl border border-[#e8e2f6] bg-white px-3 py-2.5">
-              <p className="font-medium text-[#15102b]">Shift Handoff Digest</p>
-              <p className="mt-0.5 text-[11px] text-[#5e567a]">
-                Compiled 14 completed checklists &amp; flagged 1 supply restock
+            <div className="rounded-lg border border-[#e6e2da] bg-white px-3 py-2.5">
+              <p className="font-medium text-[#111015]">One-Line Site Sync · 184 Pages Indexed</p>
+              <p className="mt-0.5 text-[11px] text-[#524e4a]">
+                24/7 storefront concierge + qualified lead capture to owner inbox
               </p>
             </div>
           </div>

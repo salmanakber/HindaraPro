@@ -1,9 +1,10 @@
 import {
-  BRAND_VIDEOS,
+  CLIENT_PROJECTS,
   ENGAGEMENT_TRACKS,
   FOUNDER_PROFILE,
   SAAS_VENTURES,
-  type BrandVideoItem,
+  type ClientCaseStudy,
+  type ClientProjectCategory,
   type EngagementTrack,
   type SaaSVenture,
   type VentureCategory,
@@ -79,6 +80,14 @@ export function filterVentures(
 
     return searchableText.includes(normalizedQuery);
   });
+}
+
+export function filterClientProjects(
+  projects: ClientCaseStudy[],
+  category: ClientProjectCategory
+): ClientCaseStudy[] {
+  if (category === 'all') return projects;
+  return projects.filter((project) => project.category === category);
 }
 
 export function validateHireBrief(input: HireBriefInput): HireBriefValidationResult {
@@ -183,7 +192,7 @@ const SURFACE_LABELS: Record<BuildSurface, string> = {
   'web-saas': 'Multi-Tenant Web SaaS',
   'mobile-app': 'React Native iOS & Android App',
   'shopify-app': 'Shopify Embedded App & Store Sync',
-  'ai-agent': 'AI Agent & Workflow Automation',
+  'ai-agent': 'Webflow/Wix/Shopify AI Chatbot & Automation',
 };
 
 export function recommendEngagementScope(
@@ -212,7 +221,7 @@ export function recommendEngagementScope(
   if (isPureMobileOrShopify && activeSurfaces.length <= 2) {
     return {
       trackId: 'mobile-shopify',
-      trackTitle: 'React Native & Shopify App Build',
+      trackTitle: 'React Native, Shopify & AI Build',
       estimatedWeeks: '3–6 Weeks Fixed Scope',
       suggestedTimeline: 'next-month',
       suggestedBudgetRange: '5k-15k',
@@ -264,8 +273,8 @@ export type AssistantToolAction =
       summaryNote: string;
     }
   | {
-      type: 'brand_video_focus';
-      video: BrandVideoItem;
+      type: 'client_case_focus';
+      project: ClientCaseStudy;
     };
 
 const VALID_SURFACES = new Set<BuildSurface>([
@@ -303,6 +312,7 @@ const VALID_BUDGETS = new Set<HireBriefInput['budgetRange']>([
 export function sanitizeFounderAliasText(value: string): string {
   return value
     .replace(/\bSalman\s+Akbe?r\b/gi, FOUNDER_PROFILE.primaryName)
+    .replace(/\bSalman\s+Akba?r\b/gi, FOUNDER_PROFILE.primaryName)
     .replace(/\bSalman\s+Khan\b/gi, FOUNDER_PROFILE.primaryName);
 }
 
@@ -468,16 +478,18 @@ export function buildHireBriefDraftAction(args: {
   };
 }
 
-export function buildBrandVideoFocusAction(
-  videoId: unknown
-): Extract<AssistantToolAction, { type: 'brand_video_focus' }> {
-  const normalized = typeof videoId === 'string' ? videoId.trim().toLowerCase() : '';
+export function buildClientCaseFocusAction(
+  projectId: unknown
+): Extract<AssistantToolAction, { type: 'client_case_focus' }> {
+  const normalized = typeof projectId === 'string' ? projectId.trim().toLowerCase() : '';
   const matched =
-    BRAND_VIDEOS.find((v) => v.id === normalized) ?? BRAND_VIDEOS[0];
+    CLIENT_PROJECTS.find(
+      (p) => p.id === normalized || p.slug === normalized || p.clientName.toLowerCase().includes(normalized)
+    ) ?? CLIENT_PROJECTS[0];
 
   return {
-    type: 'brand_video_focus',
-    video: matched,
+    type: 'client_case_focus',
+    project: matched,
   };
 }
 
@@ -531,7 +543,7 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: 'Auto-Detect (Any Language)',
     englishName: 'Auto-Detect',
     isRtl: false,
-    welcomeMessage: `Welcome to Hindara Labs. Chat in any language — ask about our six live SaaS products, request an architecture scope estimate, watch a studio film, or draft a project brief with ${FOUNDER_PROFILE.primaryName}.`,
+    welcomeMessage: `Welcome to Hindara Labs. Ask in any language about our six live SaaS products (including TidyAgent for Webflow, Wix & Shopify), explore featured client case studies, or draft a project brief with ${FOUNDER_PROFILE.primaryName}.`,
     inputPlaceholder: 'Ask in any language (English, اردو, العربية, Español...)',
   },
   {
@@ -539,15 +551,15 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: 'English',
     englishName: 'English',
     isRtl: false,
-    welcomeMessage: `Welcome to Hindara Labs. Ask about our six live SaaS products, request an architecture scope estimate, watch a studio film, or draft a project brief directly with ${FOUNDER_PROFILE.primaryName}.`,
-    inputPlaceholder: 'Ask about our SaaS apps or hiring...',
+    welcomeMessage: `Welcome to Hindara Labs. Ask about our six live SaaS products, TidyAgent AI chatbot for Webflow/Wix/Shopify, featured client builds, or draft a project brief directly with ${FOUNDER_PROFILE.primaryName}.`,
+    inputPlaceholder: 'Ask about our SaaS apps, case studies, or hiring...',
   },
   {
     code: 'ur',
     nativeLabel: 'اردو (Urdu)',
     englishName: 'Urdu',
     isRtl: true,
-    welcomeMessage: `ہندارا لیبز (Hindara Labs) میں خوش آمدید۔ آپ ہمارے 6 لائیو SaaS پلیٹ فارمز، سافٹ ویئر آرکیٹیکچر، یا بانی ${FOUNDER_PROFILE.primaryName} کی خدمات حاصل کرنے کے بارے میں اردو میں بات کر سکتے ہیں۔`,
+    welcomeMessage: `ہندارا لیبز (Hindara Labs) میں خوش آمدید۔ آپ ہمارے 6 لائیو SaaS پلیٹ فارمز، Webflow/Wix/Shopify کے لیے TidyAgent چیٹ بوٹ، یا بانی ${FOUNDER_PROFILE.primaryName} کی خدمات حاصل کرنے کے بارے میں اردو میں بات کر سکتے ہیں۔`,
     inputPlaceholder: 'اردو میں اپنا سوال یا پروجیکٹ کی تفصیل لکھیں...',
   },
   {
@@ -555,7 +567,7 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: 'العربية (Arabic)',
     englishName: 'Arabic',
     isRtl: true,
-    welcomeMessage: `مرحبًا بكم في Hindara Labs. اسأل باللغة العربية عن منتجاتنا الستة (SaaS) أو تقدير نطاق المشروع أو التواصل مباشرة مع المؤسس ${FOUNDER_PROFILE.primaryName}.`,
+    welcomeMessage: `مرحبًا بكم في Hindara Labs. اسأل باللغة العربية عن منتجاتنا الستة (SaaS)، روبوت TidyAgent لمتاجر Webflow و Wix و Shopify، أو التواصل مباشرة مع المؤسس ${FOUNDER_PROFILE.primaryName}.`,
     inputPlaceholder: 'اكتب سؤالك أو تفاصيل مشروعك بالعربية...',
   },
   {
@@ -563,7 +575,7 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: 'Español',
     englishName: 'Spanish',
     isRtl: false,
-    welcomeMessage: `Bienvenido a Hindara Labs. Pregunta en español sobre nuestros seis productos SaaS activos, solicita una estimación técnica o prepara un brief de proyecto directamente con ${FOUNDER_PROFILE.primaryName}.`,
+    welcomeMessage: `Bienvenido a Hindara Labs. Pregunta en español sobre nuestros seis productos SaaS, el chatbot TidyAgent para Webflow, Wix y Shopify, o prepara un brief directamente con ${FOUNDER_PROFILE.primaryName}.`,
     inputPlaceholder: 'Escribe tu consulta en español...',
   },
   {
@@ -571,7 +583,7 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: 'Français',
     englishName: 'French',
     isRtl: false,
-    welcomeMessage: `Bienvenue chez Hindara Labs. Posez vos questions en français sur nos six solutions SaaS, demandez un cadrage technique ou préparez un brief directement avec ${FOUNDER_PROFILE.primaryName}.`,
+    welcomeMessage: `Bienvenue chez Hindara Labs. Posez vos questions en français sur nos six solutions SaaS, TidyAgent pour Webflow, Wix et Shopify, ou préparez un brief directement avec ${FOUNDER_PROFILE.primaryName}.`,
     inputPlaceholder: 'Posez votre question en français...',
   },
   {
@@ -579,7 +591,7 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: 'Deutsch',
     englishName: 'German',
     isRtl: false,
-    welcomeMessage: `Willkommen bei Hindara Labs. Fragen Sie auf Deutsch nach unseren sechs aktiven SaaS-Produkten, einer technischen Projektplanung oder einer direkten Zusammenarbeit mit ${FOUNDER_PROFILE.primaryName}.`,
+    welcomeMessage: `Willkommen bei Hindara Labs. Fragen Sie auf Deutsch nach unseren sechs aktiven SaaS-Produkten, TidyAgent für Webflow, Wix & Shopify oder einer Zusammenarbeit mit ${FOUNDER_PROFILE.primaryName}.`,
     inputPlaceholder: 'Stellen Sie Ihre Frage auf Deutsch...',
   },
   {
@@ -587,7 +599,7 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: 'हिन्दी (Hindi)',
     englishName: 'Hindi',
     isRtl: false,
-    welcomeMessage: `Hindara Labs में आपका स्वागत है। हमारे छह लाइव SaaS उत्पादों, तकनीकी आर्किटेक्चर या संस्थापक ${FOUNDER_PROFILE.primaryName} को हायर करने के बारे में हिन्दी में पूछें।`,
+    welcomeMessage: `Hindara Labs में आपका स्वागत है। हमारे छह लाइव SaaS उत्पादों, Webflow/Wix/Shopify के लिए TidyAgent चैटबॉट, या संस्थापक ${FOUNDER_PROFILE.primaryName} को हायर करने के बारे में हिन्दी में पूछें।`,
     inputPlaceholder: 'हिन्दी में अपना प्रश्न या प्रोजेक्ट विवरण लिखें...',
   },
   {
@@ -595,7 +607,7 @@ export const ASSISTANT_LANGUAGES: AssistantLanguageOption[] = [
     nativeLabel: '中文 (Chinese)',
     englishName: 'Chinese',
     isRtl: false,
-    welcomeMessage: `欢迎来到 Hindara Labs。您可以用中文咨询我们旗下的六款上线 SaaS 产品、架构评估，或直接向创始人 ${FOUNDER_PROFILE.primaryName} 发起项目合作意向。`,
+    welcomeMessage: `欢迎来到 Hindara Labs。您可以用中文咨询我们的六款 SaaS 产品、适用于 Webflow/Wix/Shopify 的 TidyAgent 聊天机器人，或直接向创始人 ${FOUNDER_PROFILE.primaryName} 发起合作。`,
     inputPlaceholder: '请用中文输入您的项目需求或问题...',
   },
 ];
@@ -605,10 +617,9 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
 > = {
   ur: {
     advisor: [
-      'Shopify اسٹور کے لیے Hindara Labs کی کون سی ایپ بہتر ہے؟',
-      'TidyFlow اور TidyAgent کیا کام کرتے ہیں؟',
-      'Suleman Khan کو نئے SaaS پروجیکٹ کے لیے کیسے ہائر کریں؟',
-      'Hindara Labs کی برانڈ ویڈیوز دکھائیں',
+      'Webflow، Wix یا Shopify اسٹور پر TidyAgent کیسے کام کرتا ہے؟',
+      'Shopify اسٹور کے لیے Hindara Labs کی کون سی ایپس بہترین ہیں؟',
+      'Suleman Khan کو نئے SaaS یا کلائنٹ پروجیکٹ کے لیے کیسے ہائر کریں؟',
     ],
     architect: [
       'اگلے ماہ لانچ کے لیے Shopify وارنٹی ایپ اور React Native ایپ کا اسکوپ بتائیں',
@@ -623,10 +634,9 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
   },
   ar: {
     advisor: [
-      'أي تطبيق من Hindara Labs يناسب متاجر Shopify؟',
-      'اشرح كيف يعمل TidyFlow و TidyAgent معًا',
+      'كيف يعمل TidyAgent على مواقع Webflow و Wix و Shopify؟',
+      'أي تطبيقات Hindara Labs تناسب متاجر Shopify؟',
       'كيف يمكنني توظيف Suleman Khan لبناء منصة SaaS؟',
-      'أرني الفيديو التعريفي لاستوديو Hindara Labs',
     ],
     architect: [
       'قدّر نطاق بناء تطبيق ضمان Shopify مع تطبيق جوال React Native',
@@ -641,10 +651,9 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
   },
   es: {
     advisor: [
+      '¿Cómo funciona TidyAgent en tiendas Webflow, Wix y Shopify?',
       '¿Qué producto de Hindara Labs encaja mejor con una tienda Shopify?',
-      'Explica qué hacen juntos TidyFlow y TidyAgent',
       '¿Cómo puedo contratar a Suleman Khan para un SaaS MVP?',
-      'Muéstrame el video de presentación de Hindara Labs',
     ],
     architect: [
       'Calcula el alcance de una app Shopify de garantías y app móvil React Native',
@@ -659,8 +668,8 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
   },
   fr: {
     advisor: [
+      'Comment TidyAgent fonctionne sur Webflow, Wix et Shopify ?',
       'Quel SaaS de Hindara Labs convient à une boutique Shopify ?',
-      'Expliquez le rôle de TidyFlow et TidyAgent',
       'Comment engager Suleman Khan pour un SaaS MVP ?',
     ],
     architect: [
@@ -674,8 +683,8 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
   },
   de: {
     advisor: [
+      'Wie funktioniert TidyAgent für Webflow-, Wix- & Shopify-Stores?',
       'Welches SaaS von Hindara Labs passt zu einem Shopify-Shop?',
-      'Wie arbeiten TidyFlow und TidyAgent zusammen?',
       'Wie kann ich Suleman Khan für ein SaaS-MVP beauftragen?',
     ],
     architect: [
@@ -689,8 +698,8 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
   },
   hi: {
     advisor: [
+      'Webflow, Wix और Shopify स्टोर के लिए TidyAgent चैटबॉट कैसे काम करता है?',
       'Shopify स्टोर के लिए Hindara Labs का कौन सा SaaS सबसे सही है?',
-      'TidyFlow और TidyAgent क्या करते हैं?',
       'Suleman Khan को SaaS MVP के लिए कैसे हायर करें?',
     ],
     architect: [
@@ -704,8 +713,8 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
   },
   zh: {
     advisor: [
+      'TidyAgent 如何嵌入 Webflow、Wix 和 Shopify 商店网站？',
       'Hindara Labs 的哪款 SaaS 最适合 Shopify 品牌？',
-      '请介绍 TidyFlow 和 TidyAgent 的核心功能',
       '如何聘请 Suleman Khan 开发 SaaS MVP？',
     ],
     architect: [
@@ -721,10 +730,10 @@ const STARTER_PROMPTS_BY_LANG_AND_MODE: Partial<
 
 const ENGLISH_STARTER_PROMPTS: Record<AssistantMode, string[]> = {
   advisor: [
+    'How does TidyAgent AI chatbot work on Webflow, Wix & Shopify?',
     'Which Hindara Labs SaaS fits a Shopify brand?',
-    'Explain what TidyFlow and TidyAgent do together',
-    'Show me the Hindara Labs brand film overview',
-    'How can I hire Suleman Khan for a SaaS MVP?',
+    'Show featured client portfolio case studies & results',
+    'How can I hire the Hindara Labs team for a SaaS MVP?',
   ],
   architect: [
     'Scope a Shopify warranty app and React Native mobile companion',
@@ -748,7 +757,6 @@ export function resolveAssistantLanguage(rawCode: unknown): AssistantLanguageOpt
 }
 
 export function isRtlText(text: string): boolean {
-  // Arabic / Urdu / Hebrew Unicode blocks
   return /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/.test(text);
 }
 
@@ -758,16 +766,13 @@ export function getLocalizedStarterPrompts(
 ): string[] {
   if (language === 'auto') {
     return [
-      'Which Hindara Labs SaaS fits a Shopify brand?',
+      'How does TidyAgent work on Webflow, Wix & Shopify sites?',
       'Explícame qué hacen TidyFlow y TidyAgent en español',
       'اردو میں بتائیں کہ Suleman Khan کو کیسے ہائر کریں؟',
-      'Scope a Shopify warranty app and React Native mobile companion',
+      'Show featured client portfolio builds & outcomes',
     ];
   }
   return (
     STARTER_PROMPTS_BY_LANG_AND_MODE[language]?.[mode] ?? ENGLISH_STARTER_PROMPTS[mode]
   );
 }
-
-
-

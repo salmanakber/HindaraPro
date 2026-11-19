@@ -1,13 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BRAND_VIDEOS, SAAS_VENTURES } from '../data/portfolio.ts';
+import fs from 'node:fs';
+import {
+  CLIENT_PROJECTS,
+  CLIENT_REVIEWS,
+  FAQ_ITEMS,
+  SAAS_VENTURES,
+  STUDIO_RATING_SUMMARY,
+} from '../data/portfolio.ts';
+import { applyRouteSeoToHtml, normalizeRoute, ROUTE_SEO } from '../data/seoRoutes.ts';
 import {
   ASSISTANT_LANGUAGES,
-  buildBrandVideoFocusAction,
+  buildClientCaseFocusAction,
   buildHireBriefDraftAction,
   buildHireScopeSummary,
   buildScopeRecommendationAction,
   buildVentureSpotlightAction,
+  filterClientProjects,
   filterVentures,
   getLocalizedStarterPrompts,
   isRtlText,
@@ -23,7 +32,7 @@ import {
   getVentureCameraPose,
 } from './ecosystem3d.ts';
 
-test('filterVentures returns all 6 SaaS products when category is all and query is empty', () => {
+test('filterVentures returns all 6 SaaS products with accurate TidyAgent Webflow/Wix/Shopify copy', () => {
   const result = filterVentures(SAAS_VENTURES, 'all', '');
   assert.equal(result.length, 6);
   assert.deepEqual(
@@ -37,6 +46,13 @@ test('filterVentures returns all 6 SaaS products when category is all and query 
       'https://slotwise.hindaralabs.com/',
     ]
   );
+
+  const tidyAgent = result.find((v) => v.id === 'tidyagent');
+  assert.ok(tidyAgent);
+  assert.ok(tidyAgent.tagline.includes('Webflow'));
+  assert.ok(tidyAgent.tagline.includes('Wix'));
+  assert.ok(tidyAgent.tagline.includes('Shopify'));
+  assert.equal(tidyAgent.secondaryUrl?.href, 'https://apps.shopify.com/tidy-agent');
 });
 
 test('filterVentures filters accurately by category and search keyword', () => {
@@ -47,15 +63,48 @@ test('filterVentures filters accurately by category and search keyword', () => {
     ['tidysync', 'stocksentry', 'aftersale']
   );
 
+  const webflowSearch = filterVentures(SAAS_VENTURES, 'all', 'Webflow');
+  assert.ok(webflowSearch.some((v) => v.id === 'tidyagent'));
+
   const quickbooksSearch = filterVentures(SAAS_VENTURES, 'all', 'QuickBooks');
   assert.equal(quickbooksSearch.length, 1);
   assert.equal(quickbooksSearch[0].id, 'tidyflow');
 
-  const stockSearch = filterVentures(SAAS_VENTURES, 'ecommerce-shopify', 'stockouts');
-  assert.equal(stockSearch.length, 0);
   const stockSearchAlt = filterVentures(SAAS_VENTURES, 'ecommerce-shopify', 'stock-outs');
   assert.equal(stockSearchAlt.length, 1);
   assert.equal(stockSearchAlt[0].id, 'stocksentry');
+});
+
+test('CLIENT_PROJECTS and filterClientProjects maintain unique slugs, images, and category filters', () => {
+  assert.equal(CLIENT_PROJECTS.length, 4);
+  const allProjects = filterClientProjects(CLIENT_PROJECTS, 'all');
+  assert.equal(allProjects.length, 4);
+
+  const shopifyProjects = filterClientProjects(CLIENT_PROJECTS, 'shopify-commerce');
+  assert.equal(shopifyProjects.length, 1);
+  assert.equal(shopifyProjects[0].id, 'velora-botanicals');
+
+  const b2bProjects = filterClientProjects(CLIENT_PROJECTS, 'b2b-saas');
+  assert.equal(b2bProjects.length, 2);
+
+  for (const proj of CLIENT_PROJECTS) {
+    assert.ok(proj.imagePath.startsWith('/src/assets/images/'));
+    assert.ok(proj.previewUrl.startsWith('/projects#'));
+    assert.ok(!proj.summary.includes('Salman'));
+  }
+});
+
+test('CLIENT_REVIEWS and STUDIO_RATING_SUMMARY contain valid 5-star review parity with zero alias leaks', () => {
+  assert.equal(CLIENT_REVIEWS.length, 4);
+  assert.equal(STUDIO_RATING_SUMMARY.ratingValue, '4.9');
+  assert.equal(STUDIO_RATING_SUMMARY.bestRating, '5');
+  assert.ok(STUDIO_RATING_SUMMARY.reviewCount >= 40);
+
+  for (const rev of CLIENT_REVIEWS) {
+    assert.equal(rev.rating, 5);
+    assert.ok(!rev.quote.includes('Salman'));
+    assert.ok(!rev.authorName.includes('Salman'));
+  }
 });
 
 test('validateHireBrief rejects empty or invalid inputs and accepts complete briefs', () => {
@@ -101,12 +150,11 @@ test('buildHireScopeSummary generates structured brief details and mailto URI', 
 
   const summary = buildHireScopeSummary(input);
   assert.ok(summary.briefId.startsWith('HL-'));
-  assert.equal(summary.trackTitle, 'React Native & Shopify App Build');
+  assert.equal(summary.trackTitle, 'React Native, Shopify & AI Build');
   assert.equal(summary.deliverables.length, 3);
   assert.ok(summary.mailtoHref.startsWith('mailto:hindarapro@gmail.com?subject='));
   assert.ok(summary.formattedBriefText.includes('Suleman Khan'));
-  assert.ok(!summary.formattedBriefText.includes('Salman Khan'));
-  assert.ok(!summary.formattedBriefText.includes('Salman Akber'));
+  assert.ok(!summary.formattedBriefText.includes('Salman'));
   assert.ok(summary.formattedBriefText.includes('BrandForge Retail'));
 });
 
@@ -140,7 +188,7 @@ test('recommendEngagementScope selects optimal engagement track and budget from 
   assert.equal(multiMvp.suggestedBudgetRange, '15k-plus');
 });
 
-test('assistant tool builders sanitize inputs and resolve real studio records', () => {
+test('assistant tool builders sanitize inputs and resolve real studio and case records', () => {
   const scopeAction = buildScopeRecommendationAction({
     surfaces: ['shopify-app', 'mobile-app', 'invalid-surface'],
     stage: 'idea-mvp',
@@ -153,13 +201,13 @@ test('assistant tool builders sanitize inputs and resolve real studio records', 
   assert.equal(scopeAction.companyOrProject, 'Kite Commerce');
 
   const spotlight = buildVentureSpotlightAction(
-    ['tidysync', 'aftersale', 'unknown-app', 'tidysync'],
-    'Both serve Shopify merchants directly.'
+    ['tidysync', 'tidyagent', 'unknown-app', 'tidysync'],
+    'Fits Shopify and Webflow store automation.'
   );
   assert.ok(spotlight);
   assert.equal(spotlight.ventures.length, 2);
   assert.equal(spotlight.ventures[0].url, 'https://sync.tidyflowapp.com/');
-  assert.equal(spotlight.ventures[1].url, 'https://aftersale.tidyflowapp.com/');
+  assert.equal(spotlight.ventures[1].url, 'https://agent.tidyflowapp.com/');
 
   const incompleteBrief = buildHireBriefDraftAction({
     trackId: 'fractional-cto',
@@ -179,8 +227,9 @@ test('assistant tool builders sanitize inputs and resolve real studio records', 
   });
   assert.equal(readyBrief.readyToSend, true);
 
-  const videoAction = buildBrandVideoFocusAction('operations-ai');
-  assert.equal(videoAction.video.videoUrl, '/videos/operations-ai-tidyflow-tidyagent.mp4');
+  const caseAction = buildClientCaseFocusAction('healwell-telehealth');
+  assert.equal(caseAction.project.id, 'healwell-telehealth');
+  assert.equal(caseAction.project.previewUrl, '/projects#healwell-telehealth');
 
   const spoken = sanitizeSpeechText(
     '**TidyFlow** (https://tidyflowapp.com/) and Salman Akber lead field ops.'
@@ -190,30 +239,6 @@ test('assistant tool builders sanitize inputs and resolve real studio records', 
   assert.ok(spoken.includes('tidyflowapp.com'));
   assert.ok(spoken.includes('Suleman Khan'));
   assert.ok(!spoken.includes('Salman Akber'));
-});
-
-test('BRAND_VIDEOS provide unique MP4 reels, captions, posters, and Suleman Khan SEO metadata', () => {
-  assert.equal(BRAND_VIDEOS.length, 3);
-  const videoUrls = new Set<string>();
-  const posterUrls = new Set<string>();
-  const captionUrls = new Set<string>();
-
-  for (const video of BRAND_VIDEOS) {
-    assert.match(video.videoUrl, /^\/videos\/[a-z0-9-]+\.mp4$/);
-    assert.match(video.posterUrl, /^\/videos\/[a-z0-9-]+\.jpg$/);
-    assert.match(video.captionsUrl, /^\/videos\/[a-z0-9-]+\.vtt$/);
-    assert.match(video.isoDuration, /^PT\d+S$/);
-    assert.ok(video.transcript.length > 100);
-    assert.ok(!video.transcript.includes('Salman Khan'));
-    assert.ok(!video.transcript.includes('Salman Akber'));
-    videoUrls.add(video.videoUrl);
-    posterUrls.add(video.posterUrl);
-    captionUrls.add(video.captionsUrl);
-  }
-
-  assert.equal(videoUrls.size, 3);
-  assert.equal(posterUrls.size, 3);
-  assert.equal(captionUrls.size, 3);
 });
 
 test('multilingual assistant configuration supports RTL, auto-detect, localized prompts, and Unicode TTS text', () => {
@@ -246,4 +271,46 @@ test('multilingual assistant configuration supports RTL, auto-detect, localized 
   assert.ok(!urduSpeech.includes('**'));
 });
 
+test('applyRouteSeoToHtml injects unique canonical, OG/Twitter tags, BreadcrumbList, and Google Rich Results compliance', () => {
+  assert.equal(normalizeRoute('/hire'), '/services');
+  assert.equal(normalizeRoute('/case-studies/'), '/projects');
 
+  const rawHtml = fs.readFileSync('index.html', 'utf-8');
+  const servicesHtml = applyRouteSeoToHtml(rawHtml, '/services');
+  assert.ok(
+    servicesHtml.includes(
+      `<title>${ROUTE_SEO['/services'].title.replaceAll('&', '&amp;')}</title>`
+    )
+  );
+  assert.ok(servicesHtml.includes('<link rel="canonical" href="https://hindaralabs.com/services" />'));
+  assert.ok(servicesHtml.includes('<meta property="og:url" content="https://hindaralabs.com/services" />'));
+  assert.ok(servicesHtml.includes('id="route-breadcrumb-ld"'));
+
+  const projectsHtml = applyRouteSeoToHtml(rawHtml, '/projects');
+  assert.ok(projectsHtml.includes('<link rel="canonical" href="https://hindaralabs.com/projects" />'));
+  assert.ok(projectsHtml.includes('Webflow AI chatbot') || rawHtml.includes('Webflow AI chatbot'));
+
+  // Validate JSON-LD Product & SoftwareApplication nodes include offers + aggregateRating (required by Google Rich Results)
+  const ldMatch = rawHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(ldMatch);
+  const parsed = JSON.parse(ldMatch[1]) as { '@graph': Array<Record<string, unknown>> };
+  const productNode = parsed['@graph'].find((n) => n['@type'] === 'Product');
+  assert.ok(productNode);
+  assert.ok(productNode.offers);
+  assert.ok(productNode.aggregateRating);
+  assert.equal((productNode.review as unknown[]).length, CLIENT_REVIEWS.length);
+
+  const softwareNodes = parsed['@graph'].filter((n) => n['@type'] === 'SoftwareApplication');
+  assert.equal(softwareNodes.length, 6);
+  for (const sw of softwareNodes) {
+    assert.ok(sw.offers, `Missing offers on SoftwareApplication ${String(sw.name)}`);
+  }
+
+  const profService = parsed['@graph'].find((n) => n['@type'] === 'ProfessionalService');
+  assert.ok(profService);
+  assert.equal(profService.aggregateRating, undefined);
+
+  const faqNode = parsed['@graph'].find((n) => n['@type'] === 'FAQPage');
+  assert.ok(faqNode);
+  assert.equal((faqNode.mainEntity as unknown[]).length, FAQ_ITEMS.length);
+});

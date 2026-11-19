@@ -1,34 +1,48 @@
 import { useEffect, useState } from 'react';
 import {
   SAAS_VENTURES,
-  type BrandVideoItem,
+  type ClientCaseStudy,
   type SaaSVenture,
 } from './data/portfolio';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { PortfolioSection } from './components/PortfolioSection';
-import { VideoShowcaseSection } from './components/VideoShowcaseSection';
+import { StudioCraftSection } from './components/StudioCraftSection';
+import { ClientShowcaseSection } from './components/ClientShowcaseSection';
 import { FounderSection } from './components/FounderSection';
+import { ReviewsSection } from './components/ReviewsSection';
 import { HireMeSection, type ExternalBriefDraft } from './components/HireMeSection';
 import { FaqSection, SiteFooter } from './components/FaqAndFooter';
 import { VentureModal } from './components/VentureModal';
+import { CaseStudyModal } from './components/CaseStudyModal';
 import { PrivacyPolicyPage, TermsOfServicePage } from './components/LegalPages';
+import {
+  AboutStudioPage,
+  ProjectsArchivePage,
+  ServicesHirePage,
+} from './components/StudioPages';
+import {
+  buildBreadcrumbJsonLd,
+  normalizeRoute,
+  ROUTE_SEO,
+  type StudioRoute,
+} from './data/seoRoutes';
 import { StudioChatbot } from './components/StudioChatbot';
 import type { BuildSurface, HireBriefInput, ProjectStage } from './utils/portfolioLogic';
 
-function normalizeRoute(pathname: string): '/' | '/privacy' | '/terms' {
-  const clean = pathname.toLowerCase().replace(/\/+$/, '') || '/';
-  if (clean === '/privacy' || clean === '/privacy-policy') return '/privacy';
-  if (clean === '/terms' || clean === '/terms-of-service') return '/terms';
-  return '/';
+function upsertMeta(selector: string, content: string) {
+  const el = document.querySelector(selector);
+  if (el) {
+    el.setAttribute('content', content);
+  }
 }
 
 export default function App() {
-  const [route, setRoute] = useState<'/' | '/privacy' | '/terms'>(() =>
+  const [route, setRoute] = useState<StudioRoute>(() =>
     normalizeRoute(window.location.pathname)
   );
   const [selectedVenture, setSelectedVenture] = useState<SaaSVenture | null>(null);
-  const [activeVideoId, setActiveVideoId] = useState<BrandVideoItem['id']>('studio-showcase');
+  const [selectedProject, setSelectedProject] = useState<ClientCaseStudy | null>(null);
   const [externalBriefDraft, setExternalBriefDraft] = useState<ExternalBriefDraft | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [queuedPrompt, setQueuedPrompt] = useState<{
@@ -46,13 +60,29 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (route === '/privacy') {
-      document.title = 'Privacy Policy | Hindara Labs – Suleman Khan';
-    } else if (route === '/terms') {
-      document.title = 'Terms of Service | Hindara Labs – Suleman Khan';
-    } else {
-      document.title = 'Hindara Labs | Suleman Khan – SaaS Venture Studio';
+    const meta = ROUTE_SEO[route];
+    document.title = meta.title;
+    upsertMeta('meta[name="description"]', meta.description);
+    upsertMeta('meta[name="keywords"]', meta.keywords);
+    upsertMeta('meta[property="og:title"]', meta.title);
+    upsertMeta('meta[property="og:description"]', meta.description);
+    upsertMeta('meta[property="og:url"]', meta.canonicalUrl);
+    upsertMeta('meta[name="twitter:title"]', meta.title);
+    upsertMeta('meta[name="twitter:description"]', meta.description);
+
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) {
+      canonicalEl.setAttribute('href', meta.canonicalUrl);
     }
+
+    let breadcrumbScript = document.getElementById('route-breadcrumb-ld');
+    if (!breadcrumbScript) {
+      breadcrumbScript = document.createElement('script');
+      breadcrumbScript.id = 'route-breadcrumb-ld';
+      breadcrumbScript.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(breadcrumbScript);
+    }
+    breadcrumbScript.textContent = buildBreadcrumbJsonLd(route);
   }, [route]);
 
   const navigate = (path: string, hash?: string) => {
@@ -111,20 +141,31 @@ export default function App() {
     handleJumpToHire();
   };
 
-  const handlePlayBrandVideo = (videoId: BrandVideoItem['id']) => {
-    setActiveVideoId(videoId);
-    if (route !== '/') {
-      navigate('/', '#brand-films');
-    } else {
-      document.querySelector('#brand-films')?.scrollIntoView({ behavior: 'smooth' });
-    }
+  const handleRequestSimilarProject = (project: ClientCaseStudy) => {
+    setSelectedProject(null);
+    handleApplyBriefDraft({
+      draft: {
+        trackId: project.category === 'healthtech-mobile' ? 'mobile-shopify' : 'mvp-build',
+        projectGoals: `Interested in building a custom system similar to ${project.clientName} (${project.title}). Target stack & capabilities: ${project.stack.slice(0, 3).join(', ')}.`,
+      },
+    });
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfbff] text-[#15102b]">
+    <div className="min-h-screen bg-[#faf9f6] text-[#111015]">
       <Navbar currentPath={route} onNavigate={navigate} />
       <main>
-        {route === '/privacy' ? (
+        {route === '/projects' ? (
+          <ProjectsArchivePage
+            onNavigate={navigate}
+            onSelectVenture={setSelectedVenture}
+            onInspectProject={setSelectedProject}
+          />
+        ) : route === '/about' ? (
+          <AboutStudioPage onNavigate={navigate} />
+        ) : route === '/services' ? (
+          <ServicesHirePage onNavigate={navigate} />
+        ) : route === '/privacy' ? (
           <PrivacyPolicyPage onNavigate={navigate} />
         ) : route === '/terms' ? (
           <TermsOfServicePage onNavigate={navigate} />
@@ -132,17 +173,17 @@ export default function App() {
           <>
             <Hero onInspectVenture={handleInspectById} />
             <PortfolioSection onSelectVenture={setSelectedVenture} />
-            <VideoShowcaseSection
-              activeVideoId={activeVideoId}
-              onSelectVideo={setActiveVideoId}
-              onAskAiAboutVideo={(video) =>
-                handleOpenChat(
-                  `Tell me about the stack and live products featured in "${video.title}".`
-                )
-              }
+            <StudioCraftSection onNavigate={navigate} />
+            <ClientShowcaseSection
+              onInspectProject={setSelectedProject}
+              onNavigate={navigate}
             />
-            <FounderSection />
-            <HireMeSection externalBriefDraft={externalBriefDraft} />
+            <FounderSection onNavigate={navigate} />
+            <ReviewsSection />
+            <HireMeSection
+              externalBriefDraft={externalBriefDraft}
+              onNavigate={navigate}
+            />
             <FaqSection />
           </>
         )}
@@ -159,6 +200,11 @@ export default function App() {
           );
         }}
       />
+      <CaseStudyModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+        onRequestSimilar={handleRequestSimilarProject}
+      />
       <StudioChatbot
         isOpen={chatOpen}
         onOpenChange={setChatOpen}
@@ -166,7 +212,7 @@ export default function App() {
         onJumpToHire={handleJumpToHire}
         onApplyBriefDraft={handleApplyBriefDraft}
         onInspectVenture={handleInspectById}
-        onPlayBrandVideo={handlePlayBrandVideo}
+        onInspectClientProject={setSelectedProject}
       />
     </div>
   );
